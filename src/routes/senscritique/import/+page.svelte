@@ -430,7 +430,7 @@
                                     <div class="flex flex-wrap gap-1 items-center">
                                         <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
                                         <Button size="xs" color="blue" href={artifactUrl(item)}>View →</Button>
-                                        {#if item.dateDone}
+                                        {#if item.dateDone && toLocalDateString(item.dateDone) !== toLocalDateString(item.dbEndDate)}
                                             {@const state = dateUpdateState[item.id] ?? 'idle'}
                                             <Button
                                                 size="xs"
@@ -449,7 +449,7 @@
                                                 {/if}
                                             </Button>
                                         {/if}
-                                        {#if item.userRating !== null}
+                                        {#if item.userRating !== null && item.dbScore !== item.userRating * 10}
                                             {@const state = scoreUpdateState[item.id] ?? 'idle'}
                                             <Button
                                                 size="xs"
