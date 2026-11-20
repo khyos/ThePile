@@ -69,6 +69,7 @@
             <DropdownGroup>
                 <DropdownItem href="/profile">Profile</DropdownItem>
                 <DropdownItem href="/stats">Stats</DropdownItem>
+                <DropdownItem href="/recap/{new Date().getFullYear()}">Year Recap</DropdownItem>
                 <DropdownItem href="/tools">Tools</DropdownItem>
                 <DropdownItem href="/signout">Sign out</DropdownItem>
             </DropdownGroup>

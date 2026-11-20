@@ -1,16 +1,16 @@
 <script lang="ts">
     export let bars: { label: string; showLabel: boolean; value: number }[] = [];
     export let color = '#3b82f6';
+    export let height = 120;
 
     const W = 400;
-    const H = 120;
     const padL = 22;
     const padR = 6;
     const padT = 6;
     const padB = 22;
     const plotW = W - padL - padR;
-    const plotH = H - padT - padB;
 
+    $: plotH = height - padT - padB;
     $: maxVal = Math.max(...bars.map(b => b.value), 1);
     $: barW   = plotW / Math.max(bars.length, 1);
     $: gap    = Math.max(1, barW * 0.25);
@@ -22,7 +22,7 @@
     const lx = (i: number) => padL + (i + 0.5) * barW;
 </script>
 
-<svg viewBox="0 0 {W} {H}" class="w-full h-auto">
+<svg viewBox="0 0 {W} {height}" class="w-full h-auto">
     <!-- grid lines -->
     <line x1={padL} y1={padT}              x2={W - padR} y2={padT}              class="stroke-gray-200 dark:stroke-gray-600" stroke-width="0.5" />
     <line x1={padL} y1={padT + plotH / 2}  x2={W - padR} y2={padT + plotH / 2}  class="stroke-gray-200 dark:stroke-gray-600" stroke-width="0.5" />
@@ -50,7 +50,7 @@
         {#if bar.showLabel}
         <text
             x={lx(i)}
-            y={H - 4}
+            y={height - 4}
             text-anchor="middle"
             font-size="8"
             class="fill-gray-500 dark:fill-gray-400"
