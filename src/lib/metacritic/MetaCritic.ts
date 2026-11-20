@@ -20,7 +20,7 @@ export class MetaCritic {
         let dom;
         try {
             dom = new JSDOM(response.body)
-            const ratingSpan = dom.window.document.querySelector('.hero-scores [data-testid=global-score-value]');
+            const ratingSpan = dom.window.document.querySelector('[data-testid=global-score-value]');
             const ratingText = ratingSpan?.textContent
             if (!ratingText) {
                 return null;
