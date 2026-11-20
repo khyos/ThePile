@@ -18,11 +18,11 @@
     }
 </script>
 
-<TableBodyRow class="text-gray-950 border-gray-300">
+<TableBodyRow class="text-gray-950 dark:text-gray-200 border-gray-300">
     <TableBodyCell>
         <div style="display: inline-flex">
             {#if artifact.userInfo?.status === UserArtifactStatus.ON_GOING}
-            <ClapperboardPlaySolid size="sm" color="green" class="mr-1" style='margin-top:auto; margin-bottom:auto'/>
+            <ClapperboardPlaySolid size="sm" class="mr-1 text-[green] dark:text-green-400" style='margin-top:auto; margin-bottom:auto'/>
             {:else if artifact.userInfo?.status === UserArtifactStatus.ON_HOLD}
             <CirclePauseSolid size="sm" color="orange" class="mr-1" style='margin-top:auto; margin-bottom:auto'/>
             {/if}
@@ -45,7 +45,7 @@
                     <div class="inline-flex">
                         {ArtifactTypeUtil.getTypeName(progress.childType)} {progress.next.numbering} - {TimeUtil.formatDate(progress.next.releaseDate)}
                         {#if progress.next.releaseDate && new Date() < progress.next.releaseDate}
-                            <ClockArrowOutline size="xs" color="navy" class="ml-1" style='transform: scale(-1, 1); margin-top:auto; margin-bottom:auto'/>
+                            <ClockArrowOutline size="xs" class="ml-1 text-[navy] dark:text-blue-300" style='transform: scale(-1, 1); margin-top:auto; margin-bottom:auto'/>
                         {/if}
                     </div>
                     <span class="font-normal truncate block max-w-xs" title={progress.next.title}>{progress.next.title}</span>

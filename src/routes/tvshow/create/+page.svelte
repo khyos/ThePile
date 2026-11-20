@@ -284,7 +284,7 @@
                                 {#if selectedData[site.id]}
                                     <div class="flex flex-col text-sm">
                                         {#if selectedData[site.id]?.link}
-                                            <A href={selectedData[site.id]?.link} target="_blank" class="truncate text-blue-600">
+                                            <A color="blue" href={selectedData[site.id]?.link} target="_blank" class="truncate text-blue-600 dark:text-link-500">
                                                 {selectedData[site.id]?.link}
                                             </A>
                                         {/if}

@@ -6,18 +6,20 @@
         MultiSelect,
         Range,
         Select,
-        TabItem
+        TabItem,
+        Toast
     } from "flowbite-svelte";
+    import { CheckCircleSolid } from "flowbite-svelte-icons";
     import DoubleRange from "#lib/ui/DoubleRange.svelte";
     import { ArtifactType } from "#lib/model/Artifact";
     import type { Genre } from "#lib/model/Genre";
     import type { Platform } from "#lib/model/game/Platform";
     import type { Tag } from "#lib/model/Tag";
-    import { backlogStore } from "../stores/BacklogStore";
+    import { backlogStore, copyAiPrompt } from "../stores/BacklogStore";
+    import { pageStore } from "../stores/PageStore";
     import { BacklogOrder, BacklogOrderLabel } from "#lib/model/Backlog";
     import { get } from "svelte/store";
     
-    export let selectedTab: string = "filters";
     export let genres: Genre[] = [];
     export let platforms: Platform[] = [];
     export let backlogTags: Tag[] = [];
@@ -60,7 +62,7 @@
     };
 </script>
 
-<TabItem open={selectedTab == 'filters'} title="Filters" class="w-full">
+<TabItem key="filters" title="Filters" class="w-full">
     {#if $backlogStore.backlog.artifactType === ArtifactType.GAME}
         <Button onclick={onFetchPrices}>Fetch Prices</Button>
     {/if}
@@ -102,7 +104,16 @@
             Owned or Subscription
         </Checkbox>
     </div>
+    <Button class="mt-4 w-full" aria-label="Copy AI prompt" title="Copy AI prompt" onclick={copyAiPrompt}>AI</Button>
     {#if canEdit && onCreateTierList}
         <Button class="mt-4 w-full" onclick={onCreateTierList}>Create Tier List</Button>
+    {/if}
+    {#if $pageStore.isCopiedToastVisible}
+        <Toast class="fixed bottom-4 left-1/2 transform -translate-x-1/2" params={{ delay: 250, duration: 1000 }} dismissable={false}>
+            {#snippet icon()}
+                <CheckCircleSolid class="h-6 w-6" />
+            {/snippet}
+            Copied !
+        </Toast>
     {/if}
 </TabItem>

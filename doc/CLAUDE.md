@@ -1,4 +1,4 @@
-# CLAUDE.md — backlog-fiuo
+# CLAUDE.md — ThePile
 
 Personal entertainment backlog manager for Games, Movies, TV Shows, and Anime.
 Built with SvelteKit 2 + Svelte 5, SQLite, TypeScript, Tailwind CSS, and Flowbite.

@@ -57,7 +57,7 @@
         margin: 0.25rem;
         align-self: center;
         border-radius: 2px;
-        background-color: #3b82f6;
+        background-color: var(--app-accent);
         pointer-events: none;
     }
 </style>

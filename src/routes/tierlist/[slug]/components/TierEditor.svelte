@@ -78,7 +78,7 @@
         <Button size="xs" onclick={addTier}>
             <PlusOutline class="mr-1 h-3 w-3" /> Add Tier
         </Button>
-        <Button size="xs" color="green" onclick={save} disabled={saving}>
+        <Button size="xs" color="primary" onclick={save} disabled={saving}>
             {saving ? 'Saving...' : 'Save Tiers'}
         </Button>
     </div>

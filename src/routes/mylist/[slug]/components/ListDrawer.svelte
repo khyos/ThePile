@@ -25,12 +25,10 @@
     transitionParams={transitionDrawerParams}
     bind:open={$pageStore.openDrawer}
     id="sidebar1"
-    class="w-full md:w-92 backdrop:bg-black/25"
+    class="app-drawer w-full backdrop:bg-black/25"
 >
     <Tabs
         tabStyle="full"
-        style="align-items: center"
-        class="mr-8"
     >
         <ListDrawerTabFilters
             bind:selectedTab={$pageStore.selectedTab}

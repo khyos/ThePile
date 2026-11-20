@@ -1,10 +1,18 @@
 <!doctype html>
 <html lang="en">
 	<head>
-		<title>Backlog</title>
+		<title>ThePile</title>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script>
+			const themePreference = localStorage.getItem("THEME_PREFERENCE_KEY");
+			document.documentElement.classList.toggle(
+				"dark",
+				themePreference === "dark" ||
+					(themePreference === null && window.matchMedia("(prefers-color-scheme: dark)").matches)
+			);
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

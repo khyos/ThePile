@@ -10,7 +10,7 @@
         const lower = parseInt(label.split('–')[0]);
         if (lower >= 86) return 'bg-emerald-500';
         if (lower >= 66) return 'bg-blue-500';
-        if (lower >= 46) return 'bg-yellow-500';
+        if (lower >= 46) return 'bg-[#AB8F61]';
         if (lower >= 26) return 'bg-orange-500';
         return 'bg-red-500';
     }

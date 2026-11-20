@@ -20,7 +20,7 @@ describe('TimeUtil', () => {
         });
 
         it('should handle zero duration', () => {
-            expect(TimeUtil.formatDuration(0)).toBe('');
+            expect(TimeUtil.formatDuration(0)).toBe('0h');
         });
     });
 

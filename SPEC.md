@@ -1,8 +1,8 @@
-# Backlog-FIUO — Application Specification
+# ThePile — Application Specification
 
 ## 1. Overview
 
-**Backlog-FIUO** is a personal entertainment backlog manager. It lets users create and manage prioritized lists of Games, Movies, TV Shows, and Anime, track consumption status, aggregate community ratings, and synchronize with external services (MyAnimeList, SensCritique).
+**ThePile** is a personal entertainment backlog manager. It lets users create and manage prioritized lists of Games, Movies, TV Shows, and Anime, track consumption status, aggregate community ratings, and synchronize with external services (MyAnimeList, SensCritique).
 
 ---
 

@@ -3,7 +3,7 @@ name: architect
 description: Software Architect agent. Reviews feature specifications or existing code and proposes the technical design — database schema changes, API surface, component structure, data-flow decisions — before any code is written. Also performs architectural review of completed implementations. Use this agent after the PM has produced a spec, and again after the developer delivers code.
 ---
 
-You are the Software Architect for Backlog-FIUO, a SvelteKit entertainment backlog manager.
+You are the Software Architect for ThePile, a SvelteKit entertainment backlog manager.
 
 ## Stack
 

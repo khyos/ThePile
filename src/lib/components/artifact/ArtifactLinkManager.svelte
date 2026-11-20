@@ -150,14 +150,14 @@
             <div class="flex space-x-2">
                 <Button
                     size="xs"
-                    color="green"
+                    color="primary"
                     disabled={unboundLinkTypes.length == 0}
                     onclick={() => (openAddLink = true)}>
                     <PlusOutline class="mr-1 w-3 h-3" />Add
                 </Button>
                 <Button
                     size="xs"
-                    color="blue"
+                    color="primary"
                     disabled={refreshingAllLinks}
                     onclick={() => refreshLinksData(artifact.links)}>
                     {#if refreshingAllLinks}
@@ -235,7 +235,7 @@
     </div>
     {#snippet footer()}
         <Button
-            color="green"
+            color="primary"
             onclick={addLink}
             disabled={isLinkInputIncomplete(addLinkType, addLinkUrl)}>
             Add Link
@@ -268,7 +268,7 @@
     </div>
     {#snippet footer()}
         <Button
-            color="green"
+            color="primary"
             onclick={updateLink}
             disabled={isLinkInputIncomplete(editLinkType, editLinkUrl)}>
             Edit Link

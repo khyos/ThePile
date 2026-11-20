@@ -26,7 +26,7 @@
         if (!showWishlistAction) return '';
         const status = backlogItem.artifact.userInfo?.status;
         if (!status) return 'border-l-4 border-red-500 pl-1';
-        if (status === UserArtifactStatus.ON_HOLD) return 'border-l-4 border-yellow-400 pl-1';
+        if (status === UserArtifactStatus.ON_HOLD) return 'border-l-4 border-primary-400 pl-1';
         if (status === UserArtifactStatus.ON_GOING) return 'border-l-4 border-green-500 pl-1';
         return '';
     })();
@@ -85,7 +85,7 @@
 >
     <div class="flex items-center">
         <div style="display: inline-flex; flex-grow: 1; align-items: center;">
-            <Badge color="blue" class="font-semibold flex items-center gap-1 mr-2" style="white-space: nowrap;">
+            <Badge color="primary" class="font-semibold flex items-center gap-1 mr-2" style="white-space: nowrap;">
                 # {backlogItem.rank}
             </Badge>
             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
@@ -116,7 +116,7 @@
                     </Badge>
                 {/each}
                 {#if backlogItem.artifact.status === 'early_access'}
-                    <Badge color="yellow" class="ml-1">Early Access{#if earlyAccessFinalReleaseDate} → {TimeUtil.formatDate(earlyAccessFinalReleaseDate)}{/if}</Badge>
+                    <Badge color="primary" class="ml-1">Early Access{#if earlyAccessFinalReleaseDate} → {TimeUtil.formatDate(earlyAccessFinalReleaseDate)}{/if}</Badge>
                 {/if}
             </div>
         </div>
@@ -145,7 +145,7 @@
             </Badge>
         {/if}
         {#if backlogStoreInst.backlog.rankingType === BacklogRankingType.ELO}
-            <Badge color="purple" class="font-semibold flex items-center gap-1 mr-2">
+            <Badge color="primary" class="font-semibold flex items-center gap-1 mr-2">
                 <AwardOutline class="w-3 h-3" />
                 <span>{backlogItem.elo}</span>
             </Badge>
@@ -154,7 +154,7 @@
             <Badge class="mr-1">{TimeUtil.formatDate(backlogItem.artifact.releaseDate)}</Badge>
         {/if}
         {#if hasNoStatus}
-            <Button size="xs" color="red" class="!p-1.5 mr-1" title="Add to wishlist" onclick={addToWishlist}>
+            <Button size="xs" color="primary" class="!p-1.5 mr-1" title="Add to wishlist" onclick={addToWishlist}>
                 <BookmarkOutline class="w-4 h-4" />
             </Button>
         {/if}

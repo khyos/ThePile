@@ -65,7 +65,7 @@
                 <CheckCircleSolid class="w-4 h-4 mr-2 text-green-500" />
                 <P weight="medium" class="text-lg">Subscriptions</P>
             </div>
-            <Button size="xs" color="green" onclick={openManageSubscriptionsModal}>
+            <Button size="xs" color="primary" onclick={openManageSubscriptionsModal}>
                 <EditOutline class="mr-1 w-3 h-3" /> Manage
             </Button>
         </div>

@@ -97,9 +97,9 @@
             {#each data.groups as group (group.key)}
                 <div>
                     <div class="flex items-center gap-2 mb-1">
-                        <ExclamationCircleOutline class="w-5 h-5 text-yellow-500" />
+                        <ExclamationCircleOutline class="w-5 h-5 text-primary-500" />
                         <h2 class="text-lg font-semibold dark:text-white">{group.label}</h2>
-                        <Badge color="yellow">{group.entries.length}</Badge>
+                        <Badge color="primary">{group.entries.length}</Badge>
                     </div>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">{group.description}</p>
                     <Table hoverable>
@@ -122,7 +122,7 @@
                                     <TableBodyCell>
                                         {#if entry.type && ARTIFACT_HREF[entry.type]}
                                             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                            <a href="/{ARTIFACT_HREF[entry.type]}/{entry.artifactId}" class="hover:underline text-primary-600 dark:text-primary-400">{entry.title}</a>
+                                            <a href="/{ARTIFACT_HREF[entry.type]}/{entry.artifactId}" class="hover:underline text-link-600 dark:text-link-400">{entry.title}</a>
                                         {:else}
                                             <span class="text-gray-500 dark:text-gray-400">ID: {entry.artifactId}</span>
                                         {/if}

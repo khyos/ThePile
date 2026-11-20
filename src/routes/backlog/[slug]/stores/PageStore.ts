@@ -22,10 +22,11 @@ export const pageStore = writable<BacklogPageStore>({
     showMoveToRank: false,
 });
 
-export const toggleDrawer = () => {
+export const openDrawer = (selectedTab: BacklogPageStore['selectedTab']) => {
     pageStore.update(s => ({
         ...s,
-        openDrawer: !s.openDrawer
+        openDrawer: true,
+        selectedTab
     }));
 }
 
