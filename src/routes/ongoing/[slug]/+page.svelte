@@ -11,7 +11,7 @@
 
     export let data: PageData;
 
-    initializeStore(data.list);
+    $: initializeStore(data.list);
 </script>
 
 <Table>

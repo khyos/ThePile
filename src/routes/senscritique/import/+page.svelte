@@ -417,7 +417,7 @@
                             <TableBodyCell>
                                 {#if item.dbId !== null}
                                     {#if isDesynced(item)}
-                                        <Badge color="yellow">Desync</Badge>
+                                        <Badge color="primary">Desync</Badge>
                                     {:else}
                                         <Badge color="green">In DB</Badge>
                                     {/if}
@@ -431,7 +431,7 @@
                                 {#if item.dbId !== null}
                                     <div class="flex flex-wrap gap-1 items-center">
                                         <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                        <Button size="xs" color="blue" href={artifactUrl(item)}>View →</Button>
+                                        <Button size="xs" color="primary" href={artifactUrl(item)}>View →</Button>
                                         {#if item.dateDone && toLocalDateString(item.dateDone) !== toLocalDateString(item.dbEndDate)}
                                             {@const state = dateUpdateState[item.id] ?? 'idle'}
                                             <Button
@@ -476,19 +476,19 @@
                                     <div class="flex flex-wrap gap-1">
                                         {#if scUniverse === 'movie'}
                                             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                            <Button size="xs" color="blue" href={createUrl(item, 'movie')} target="_blank" rel="noopener noreferrer">Create Movie</Button>
+                                            <Button size="xs" color="primary" href={createUrl(item, 'movie')} target="_blank" rel="noopener noreferrer">Create Movie</Button>
                                         {:else if scUniverse === 'game'}
                                             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                            <Button size="xs" color="blue" href={createUrl(item, 'game')} target="_blank" rel="noopener noreferrer">Create Game</Button>
+                                            <Button size="xs" color="primary" href={createUrl(item, 'game')} target="_blank" rel="noopener noreferrer">Create Game</Button>
                                         {:else if scUniverse === 'comicBook'}
                                             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                            <Button size="xs" color="blue" href={createUrl(item, 'manga')} target="_blank" rel="noopener noreferrer">Create Manga</Button>
+                                            <Button size="xs" color="primary" href={createUrl(item, 'manga')} target="_blank" rel="noopener noreferrer">Create Manga</Button>
                                         {:else}
                                             <!-- serie — could be TV show or anime -->
                                             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                            <Button size="xs" color="blue" href={createUrl(item, 'tvshow')} target="_blank" rel="noopener noreferrer">Create TV Show</Button>
+                                            <Button size="xs" color="primary" href={createUrl(item, 'tvshow')} target="_blank" rel="noopener noreferrer">Create TV Show</Button>
                                             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                            <Button size="xs" color="blue" href={createUrl(item, 'anime')} target="_blank" rel="noopener noreferrer">Create Anime</Button>
+                                            <Button size="xs" color="primary" href={createUrl(item, 'anime')} target="_blank" rel="noopener noreferrer">Create Anime</Button>
                                         {/if}
                                     </div>
                                 {/if}

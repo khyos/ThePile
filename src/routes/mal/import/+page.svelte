@@ -406,7 +406,7 @@
                             <TableBodyCell>
                                 {#if item.dbId !== null}
                                     {#if isDesynced(item)}
-                                        <Badge color="yellow">Desync</Badge>
+                                        <Badge color="primary">Desync</Badge>
                                     {:else}
                                         <Badge color="green">In DB</Badge>
                                     {/if}
@@ -420,7 +420,7 @@
                                 {#if item.dbId !== null}
                                     <div class="flex flex-wrap gap-1 items-center">
                                         <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                        <Button size="xs" color="blue" href={artifactUrl(item)}>View →</Button>
+                                        <Button size="xs" color="primary" href={artifactUrl(item)}>View →</Button>
                                         {#if item.finishDate && item.finishDate !== toLocalDateString(item.dbEndDate)}
                                             {@const state = dateUpdateState[item.malId] ?? 'idle'}
                                             <Button
@@ -481,7 +481,7 @@
                                     </div>
                                 {:else}
                                     <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                    <Button size="xs" color="blue" href={createUrl(item)} target="_blank" rel="noopener noreferrer">
+                                    <Button size="xs" color="primary" href={createUrl(item)} target="_blank" rel="noopener noreferrer">
                                         Create {result?.listType === 'manga' ? 'Manga' : 'Anime'}
                                     </Button>
                                 {/if}

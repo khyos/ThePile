@@ -94,7 +94,7 @@
         bottom: 0;
         width: 3px;
         border-radius: 2px;
-        background-color: #3b82f6;
+        background-color: var(--app-accent);
         pointer-events: none;
     }
     .tier-item:global(.drop-before)::before {

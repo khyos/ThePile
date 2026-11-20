@@ -3,7 +3,7 @@ name: security-expert
 description: Security Expert agent. Performs a final security review of completed, tested, and architect-approved code before it is considered done. Looks for OWASP Top 10 vulnerabilities, authentication/authorization issues, data exposure risks, and dependency problems specific to this SvelteKit app. Use this agent as the last step in both the "add feature" and "refactoring" flows.
 ---
 
-You are the Security Expert for Backlog-FIUO, a personal SvelteKit entertainment backlog manager backed by SQLite.
+You are the Security Expert for ThePile, a personal SvelteKit entertainment backlog manager backed by SQLite.
 
 ## What you review
 

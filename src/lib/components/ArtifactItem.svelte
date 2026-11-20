@@ -52,7 +52,7 @@
         <div class="flex-1">
             <Badge color={artifact.type === ArtifactType.GAME ? 'indigo' : 'purple'} class="mb-2">{artifact.type}</Badge>
             {#if artifact.type === ArtifactType.GAME && artifact.status === 'early_access'}
-                <Badge color="yellow" class="mb-2 ml-1">Early Access</Badge>
+                <Badge color="primary" class="mb-2 ml-1">Early Access</Badge>
             {/if}
             <Heading tag="h2" class="text-4xl font-extrabold mb-1">{artifact.title}</Heading>
 
@@ -143,14 +143,22 @@
                         <P weight="medium" class="text-lg">Ratings</P>
                     </div>
                     {#if artifactMeanRating}
-                        <Badge color={getMeanRatingColor(artifactMeanRating)}>{Math.round(artifactMeanRating)}</Badge>
+                        {@const ratingColor = getMeanRatingColor(artifactMeanRating)}
+                        <Badge
+                            color={ratingColor}
+                            class={ratingColor === "gray" ? "neutral-rating" : ""}
+                        >{Math.round(artifactMeanRating)}</Badge>
                     {/if}
                 </div>
                 <div class="space-y-2 ml-6">
                     {#each artifact.ratings as rating (rating.type)}
+                        {@const ratingColor = getRatingColor(artifact.type, rating.type, rating.rating)}
                         <div class="flex justify-between items-center">
                             <span class="text-gray-700 dark:text-gray-300">{rating.type}</span>
-                            <Badge color={getRatingColor(artifact.type, rating.type, rating.rating)}>{rating.rating}</Badge>
+                            <Badge
+                                color={ratingColor}
+                                class={ratingColor === "gray" ? "neutral-rating" : ""}
+                            >{rating.rating}</Badge>
                         </div>
                     {/each}
                 </div>
@@ -167,3 +175,10 @@
         {userConnected}
     />
 </Card>
+
+<style>
+    :global(.neutral-rating) {
+        color: #2b2118;
+        background-color: #AB8F61;
+    }
+</style>

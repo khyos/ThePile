@@ -89,7 +89,7 @@
             >
                 <div class="flex items-center gap-4 pl-2">
                     <div
-                        class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-amber-500 shadow-md shrink-0 group-hover:scale-110 transition-transform duration-300"
+                        class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-primary-300 to-primary-600 shadow-md shrink-0 group-hover:scale-110 transition-transform duration-300"
                     >
                         <UserCircleSolid class="w-6 h-6 text-white" />
                     </div>

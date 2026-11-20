@@ -5,16 +5,19 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-	--color-primary-50: #EBF5FF;
-	--color-primary-100: #E1EFFE;
-	--color-primary-200: #C3DDFD;
-	--color-primary-300: #A4CAFE;
-	--color-primary-400: #76A9FA;
-	--color-primary-500: #3F83F8;
-	--color-primary-600: #1C64F2;
-	--color-primary-700: #1A56DB;
-	--color-primary-800: #1E429F;
-	--color-primary-900: #233876;
+	--color-primary-50: #fff8ed;
+	--color-primary-100: #fff0d6;
+	--color-primary-200: #ffe1ac;
+	--color-primary-300: #f3bc61;
+	--color-primary-400: #f3b25b;
+	--color-primary-500: #ad651d;
+	--color-primary-600: #9a5d18;
+	--color-primary-700: #8a5016;
+	--color-primary-800: #704014;
+	--color-primary-900: #4a2b10;
+	--color-link-400: #76a9fa;
+	--color-link-500: #3f83f8;
+	--color-link-600: #1c64f2;
 }
 
 @source "../node_modules/flowbite-svelte/dist";
@@ -25,10 +28,23 @@
   input[type="search"]::-webkit-search-cancel-button {
     display: none;
   }
+
+  input:is([type="range"], [type="checkbox"], [type="radio"]) {
+    accent-color: var(--app-accent);
+  }
+
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--app-accent-focus);
+    outline-offset: 2px;
+  }
 }
 
 body {
-    margin: 0rem 0.5rem 0.5rem 0.5rem;
+    margin: 0;
+    min-width: 320px;
+    background: var(--app-background);
+    color: var(--app-text);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
 	::placeholder {
 		color: #9ca3af;
@@ -36,8 +52,169 @@ body {
 	}
 }
 
+:root {
+    --app-background: #ffffff;
+    --app-text: #202536;
+    --app-muted: #677080;
+    --app-accent: var(--color-primary-500);
+    --app-accent-focus: var(--color-primary-500);
+    --app-accent-gradient: linear-gradient(90deg, #ee9854, #f3bc61);
+    --header-space: 64px;
+    color-scheme: light;
+}
+
+:root.dark {
+    --app-background: #0b111e;
+    --app-text: #f4f5f8;
+    --app-muted: #98a3b8;
+    --color-primary-500: var(--color-primary-400);
+    --app-accent: var(--color-primary-400);
+    --app-accent-focus: var(--color-primary-400);
+    --header-space: 88px;
+    color-scheme: dark;
+}
+
+.brand-accent {
+    background: var(--app-accent-gradient);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.app-content {
+    min-height: calc(100svh - var(--header-space));
+    padding: 0 0.5rem 0.5rem;
+}
+
+.app-content.home-page {
+    padding: 0;
+}
+
+.app-drawer {
+    --drawer-background: #f8fafc;
+    --drawer-surface: #ffffff;
+    --drawer-border: #d8dee7;
+    --drawer-close: #e2e8f0;
+    --drawer-accent: var(--app-accent);
+    padding: 0;
+    border-color: var(--drawer-border);
+    background: var(--drawer-background);
+}
+
+.app-drawer [role="tablist"] {
+    align-items: center;
+    gap: 0;
+    margin: 0;
+    padding: 24px 56px 0 24px;
+    border-bottom: 1px solid var(--drawer-border);
+}
+
+.app-drawer [role="tab"] {
+    position: relative;
+    padding: 14px 0 18px;
+    border-radius: 0;
+    color: var(--app-muted);
+    background: transparent;
+    font-size: 16px;
+    box-shadow: none;
+}
+
+.app-drawer [role="tab"][aria-selected="true"] {
+    color: var(--app-text);
+    font-weight: 600;
+}
+
+.app-drawer [role="tab"][aria-selected="true"]::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--app-accent-gradient);
+    content: "";
+}
+
+.app-drawer [role="tabpanel"] {
+    margin: 0;
+    padding: 28px 32px 32px;
+    border-radius: 0;
+    background: transparent;
+}
+
+.app-drawer > button[aria-label="Close"] {
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--drawer-close);
+}
+
+.app-drawer [role="tabpanel"] > label {
+    margin-top: 18px;
+    margin-bottom: 6px;
+}
+
+.app-drawer [role="tabpanel"] > label:first-child {
+    margin-top: 0;
+}
+
+.app-drawer :is(input:not([type]), input[type="text"], input[type="search"], select:not([hidden]), [role="listbox"]) {
+    border-color: var(--drawer-border);
+    border-radius: 9px;
+    color: var(--app-text);
+    background-color: var(--drawer-surface);
+}
+
+.app-drawer input:is([type="range"], [type="checkbox"]) {
+    accent-color: var(--drawer-accent);
+}
+
+.app-drawer [role="listbox"] > div[role="presentation"],
+.app-drawer .drawer-panel {
+    border-color: var(--drawer-border);
+    border-radius: 10px;
+    background-color: var(--drawer-surface);
+}
+
+.app-drawer :is(button, input, select, [role="listbox"]):focus-visible {
+    outline: 2px solid var(--app-accent-focus);
+    outline-offset: 2px;
+}
+
+.app-drawer [role="tab"]:focus-visible,
+.app-drawer > button[aria-label="Close"]:focus-visible {
+    outline-offset: -3px;
+}
+
+.dark .app-drawer {
+    --drawer-background: #131923;
+    --drawer-surface: #202a35;
+    --drawer-border: #404b59;
+    --drawer-close: #2b3542;
+}
+
+@media (min-width: 768px) {
+    .app-drawer {
+        width: 440px;
+    }
+}
+
+@media (max-width: 379px) {
+    .app-drawer [role="tabpanel"] {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+}
+
 @media screen and (min-width: 80rem) {
-    body {
-        margin: 0rem 2rem 2rem 2rem;
+    .app-content:not(.home-page) {
+        padding: 0 2rem 2rem;
+    }
+}
+
+@media (max-width: 639px) {
+    :root.dark {
+        --header-space: 80px;
     }
 }

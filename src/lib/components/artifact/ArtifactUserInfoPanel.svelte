@@ -84,7 +84,7 @@
 {#if userConnected}
     <div class="mt-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
         <Label for="artifactStatus" class="mb-2 flex items-center">
-            <StarSolid class="w-4 h-4 mr-1 text-yellow-400" />
+            <StarSolid class="w-4 h-4 mr-1 text-primary-500" />
             Status
         </Label>
         <Select
@@ -113,7 +113,7 @@
     </div>
     <div class="mt-4 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
         <Label class="mb-2 flex items-center">
-            <CalendarMonthSolid class="w-4 h-4 mr-1 text-yellow-400" />
+            <CalendarMonthSolid class="w-4 h-4 mr-1 text-primary-500" />
             Date
         </Label>
         {#if artifact.type === ArtifactType.MOVIE}

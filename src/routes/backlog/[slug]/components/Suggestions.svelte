@@ -53,7 +53,7 @@
 
 {#if canEdit && $backlogStore.suggestedArtifacts && $backlogStore.suggestedArtifacts.length > 0 && canEdit}
     <div class="mb-6">
-        <Listgroup class="mt-2">
+        <Listgroup class="drawer-panel mt-2">
             <div
                 class="w-full p-2 flex items-center"
             >
@@ -71,7 +71,7 @@
                             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
                             <a class='mr-1' href={`/${$backlogStore.backlog.artifactType}/${artifact.id}`}>{artifact.title}</a>
                             {#if artifact.status === 'early_access'}
-                                <Badge color="yellow" class="ml-1">Early Access</Badge>
+                                <Badge color="primary" class="ml-1">Early Access</Badge>
                             {/if}
                         </div>
                         <span class="text-sm text-gray-500 dark:text-gray-400">

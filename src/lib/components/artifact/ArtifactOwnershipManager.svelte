@@ -131,7 +131,7 @@
         </div>
     </div>
     {#snippet footer()}
-        <Button color="green" onclick={handleAddOwnership} disabled={!newOwnershipPlatform.trim()}>Add</Button>
+        <Button color="primary" onclick={handleAddOwnership} disabled={!newOwnershipPlatform.trim()}>Add</Button>
         <Button color="alternative" onclick={() => (openAddOwnership = false)}>Cancel</Button>
     {/snippet}
 </Modal>
@@ -163,7 +163,7 @@
         </div>
     </div>
     {#snippet footer()}
-        <Button color="green" onclick={handleEditOwnership} disabled={!editOwnershipPlatform.trim()}>Save</Button>
+        <Button color="primary" onclick={handleEditOwnership} disabled={!editOwnershipPlatform.trim()}>Save</Button>
         <Button color="alternative" onclick={() => (openEditOwnership = false)}>Cancel</Button>
     {/snippet}
 </Modal>

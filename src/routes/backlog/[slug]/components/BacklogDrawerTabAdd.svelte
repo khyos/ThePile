@@ -16,7 +16,6 @@
     import { backlogStore, refreshBacklog } from "../stores/BacklogStore";
     import Suggestions from "./Suggestions.svelte";
     
-    export let selectedTab: string = "filters";
     export let canEdit: boolean;
     let searchArtifactTerm: string = "";
     let searchedArtifacts: Artifact[] = [];
@@ -42,7 +41,7 @@
 
 </script>
 
-<TabItem open={selectedTab == 'add'} title="Add" class="w-full" disabled={!canEdit}>
+<TabItem key="add" title="Add" class="w-full" disabled={!canEdit}>
     <Label class="block mb-2">Add to backlog</Label>
     <Input
         id="search-field"
@@ -52,7 +51,7 @@
         onkeyup={fetchArtifacts}
     />
     {#if searchedArtifacts?.length > 0}
-        <Listgroup>
+        <Listgroup class="drawer-panel">
             {#each searchedArtifacts as artifact (artifact.id)}
                 {#if $backlogStore.backlog.backlogItems.find((bi) => bi.artifact.id === artifact.id) != null}
                     <ListgroupItem class="flex justify-between items-center w-full">
