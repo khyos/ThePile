@@ -1,4 +1,4 @@
-# Architecture Review — backlog-fiuo
+# Architecture Review — ThePile
 
 > Reviewed on 2026-06-22. Two passes: high-level structure, then deep file-by-file analysis.
 

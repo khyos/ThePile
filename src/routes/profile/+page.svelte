@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Heading, P } from "flowbite-svelte";
+    import { DarkMode, Heading, P } from "flowbite-svelte";
     import { CheckCircleSolid, CreditCardSolid } from "flowbite-svelte-icons";
     import type { PageData } from "./$types";
     import type { ISubscriptionService } from "#lib/model/SubscriptionService";
@@ -36,6 +36,16 @@
 
 <div class="max-w-2xl mx-auto space-y-8 p-4">
     <Heading tag="h1">Profile</Heading>
+
+    <section class="flex items-center justify-between gap-4" aria-labelledby="appearance-heading">
+        <div>
+            <Heading tag="h2" id="appearance-heading" class="text-lg font-semibold">Appearance</Heading>
+            <P class="text-sm text-gray-500 dark:text-gray-400">
+                Switch between light and dark mode. Your preference is saved in this browser.
+            </P>
+        </div>
+        <DarkMode ariaLabel="Toggle light and dark mode" class="shrink-0" />
+    </section>
 
     <section>
         <div class="flex items-center gap-2 mb-1">

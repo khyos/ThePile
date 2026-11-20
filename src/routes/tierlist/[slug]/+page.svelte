@@ -123,7 +123,7 @@
                 <Button size="sm" color="light" onclick={() => (showEditor = !showEditor)}>Edit tiers</Button>
                 {#if !store.tierList.isStandalone}
                     <Button size="sm" color="light" onclick={refreshFromBacklog}>Refresh from backlog</Button>
-                    <Button size="sm" color="yellow" onclick={unlinkFromBacklog}>Unlink from backlog</Button>
+                    <Button size="sm" color="primary" onclick={unlinkFromBacklog}>Unlink from backlog</Button>
                 {/if}
                 {#if store.tierList.isStandalone}
                     <Button size="sm" color="light" onclick={() => (showAddItemModal = true)}>Add item</Button>

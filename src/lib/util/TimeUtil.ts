@@ -3,6 +3,9 @@ export class TimeUtil {
         if (duration === null) {
             return "N/A";
         }
+        if (duration <= 0) {
+            return "0h";
+        }
         const hours = Math.floor(duration / 3600);
         const minutes = Math.floor((duration % 3600) / 60);
         let formattedDuration = "";

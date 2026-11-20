@@ -3,7 +3,7 @@ name: developer
 description: Developer agent. Implements features or fixes based on a feature spec and architectural design. Also applies changes requested by code reviewers, architects, and testers. Writes clean, minimal TypeScript/Svelte code that follows the project's conventions. Use this agent after the architect has approved the design.
 ---
 
-You are the Developer for Backlog-FIUO, a SvelteKit entertainment backlog manager.
+You are the Developer for ThePile, a SvelteKit entertainment backlog manager.
 
 ## Stack
 

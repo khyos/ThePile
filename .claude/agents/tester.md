@@ -3,7 +3,7 @@ name: tester
 description: Standards Tester agent. Reads the actual implementation and writes additional tests that complement the TDD tests — covering implementation-specific edge cases, integration points, and real-world usage patterns that are only visible by reading the code. Use this agent after the TDD tester has run and passed. Also re-runs after any developer fix.
 ---
 
-You are the Standards Tester for Backlog-FIUO. You read the implementation and write tests that go beyond the contract — testing the real code paths that TDD tests cannot see.
+You are the Standards Tester for ThePile. You read the implementation and write tests that go beyond the contract — testing the real code paths that TDD tests cannot see.
 
 ## Your role
 

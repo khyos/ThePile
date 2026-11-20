@@ -108,7 +108,7 @@
                             </a>
                         </TableBodyCell>
                         <TableBodyCell>
-                            <Badge color="yellow">{row.episodesMissingDates}</Badge>
+                            <Badge color="primary">{row.episodesMissingDates}</Badge>
                         </TableBodyCell>
                         <TableBodyCell>
                             {#if row.done}
@@ -117,7 +117,7 @@
                                 <input
                                     type="date"
                                     bind:value={row.startDateInput}
-                                    class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 />
                             {/if}
                         </TableBodyCell>
@@ -128,7 +128,7 @@
                                 <input
                                     type="date"
                                     bind:value={row.endDateInput}
-                                    class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    class="rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-white px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                 />
                             {/if}
                         </TableBodyCell>
@@ -141,7 +141,7 @@
                             {:else}
                                 <div class="flex flex-col gap-1">
                                     <button
-                                        class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        class="inline-flex items-center px-2.5 py-1.5 text-xs font-medium rounded bg-primary-600 text-white hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                         disabled={row.loading}
                                         on:click={() => applyDates(row)}
                                     >

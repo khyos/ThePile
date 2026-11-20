@@ -190,7 +190,7 @@
 
                     <!-- Season dates row (edit mode) -->
                     {#if editingRowId === season.id}
-                        <div class="p-3 bg-yellow-50 border-t border-gray-200">
+                        <div class="p-3 bg-primary-50 dark:bg-primary-900/30 border-t border-gray-200">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-sm font-medium w-6">{seasonIndex + 1}</span>
                                 <span class="text-sm flex-1">{season.title}</span>
@@ -222,7 +222,7 @@
                                 <Button size="xs" color="light" onclick={() => autoFillEpisodesFromSeasonDates(season)}>
                                     Auto-fill episodes from season
                                 </Button>
-                                <Button size="xs" color="green" onclick={() => saveRow(season.id)}>Save</Button>
+                                <Button size="xs" color="primary" onclick={() => saveRow(season.id)}>Save</Button>
                                 <Button size="xs" color="light" onclick={cancelEdit}>Cancel</Button>
                             </div>
                             {#if validationError}
@@ -273,7 +273,7 @@
                                 <tbody>
                                     {#each season.children as episode, epIndex (episode.id)}
                                         {#if editingRowId === episode.id}
-                                            <tr class="border-b last:border-b-0 border-gray-300 bg-yellow-50">
+                                            <tr class="border-b last:border-b-0 border-gray-300 bg-primary-50 dark:bg-primary-900/30">
                                                 <td class="p-2">{epIndex + 1}</td>
                                                 <td class="p-2">{episode.title}</td>
                                                 <td class="p-2">
@@ -297,14 +297,14 @@
                                                                 checked={finishedMap.get(episode.id) ?? false}
                                                                 onchange={(event) => handleCheckboxStatusChange(event, episode)}
                                                             />
-                                                            <Button size="xs" color="green" onclick={() => saveLeafRow(episode.id)}>Save</Button>
+                                                            <Button size="xs" color="primary" onclick={() => saveLeafRow(episode.id)}>Save</Button>
                                                             <Button size="xs" color="light" onclick={cancelEdit}>Cancel</Button>
                                                         </div>
                                                     </td>
                                                 {:else}
                                                     <td class="p-2">
                                                         <div class="flex gap-1">
-                                                            <Button size="xs" color="green" onclick={() => saveLeafRow(episode.id)}>Save</Button>
+                                                            <Button size="xs" color="primary" onclick={() => saveLeafRow(episode.id)}>Save</Button>
                                                             <Button size="xs" color="light" onclick={cancelEdit}>Cancel</Button>
                                                         </div>
                                                     </td>
@@ -372,7 +372,7 @@
                                 <tbody>
                                     {#each sectionChildren as child, index (child.id)}
                                         {#if editingRowId === child.id}
-                                            <tr class="border-b last:border-b-0 border-gray-300 bg-yellow-50">
+                                            <tr class="border-b last:border-b-0 border-gray-300 bg-primary-50 dark:bg-primary-900/30">
                                                 <td class="p-2">{index + 1}</td>
                                                 <td class="p-2">{child.title}</td>
                                                 <td class="p-2">
@@ -396,14 +396,14 @@
                                                                 checked={finishedMap.get(child.id) ?? false}
                                                                 onchange={(event) => handleCheckboxStatusChange(event, child)}
                                                             />
-                                                            <Button size="xs" color="green" onclick={() => saveLeafRow(child.id)}>Save</Button>
+                                                            <Button size="xs" color="primary" onclick={() => saveLeafRow(child.id)}>Save</Button>
                                                             <Button size="xs" color="light" onclick={cancelEdit}>Cancel</Button>
                                                         </div>
                                                     </td>
                                                 {:else}
                                                     <td class="p-2">
                                                         <div class="flex gap-1">
-                                                            <Button size="xs" color="green" onclick={() => saveLeafRow(child.id)}>Save</Button>
+                                                            <Button size="xs" color="primary" onclick={() => saveLeafRow(child.id)}>Save</Button>
                                                             <Button size="xs" color="light" onclick={cancelEdit}>Cancel</Button>
                                                         </div>
                                                     </td>
@@ -463,7 +463,7 @@
                     <tbody>
                         {#each artifact.children as child, index (child.id)}
                             {#if editingRowId === child.id}
-                                <tr class="border-b last:border-b-0 border-gray-300 bg-yellow-50">
+                                <tr class="border-b last:border-b-0 border-gray-300 bg-primary-50 dark:bg-primary-900/30">
                                     <td class="p-2">{index + 1}</td>
                                     <td class="p-2">{child.title}</td>
                                     <td class="p-2">
@@ -487,14 +487,14 @@
                                                     checked={finishedMap.get(child.id) ?? false}
                                                     onchange={(event) => handleCheckboxStatusChange(event, child)}
                                                 />
-                                                <Button size="xs" color="green" onclick={() => saveLeafRow(child.id)}>Save</Button>
+                                                <Button size="xs" color="primary" onclick={() => saveLeafRow(child.id)}>Save</Button>
                                                 <Button size="xs" color="light" onclick={cancelEdit}>Cancel</Button>
                                             </div>
                                         </td>
                                     {:else}
                                         <td class="p-2">
                                             <div class="flex gap-1">
-                                                <Button size="xs" color="green" onclick={() => saveLeafRow(child.id)}>Save</Button>
+                                                <Button size="xs" color="primary" onclick={() => saveLeafRow(child.id)}>Save</Button>
                                                 <Button size="xs" color="light" onclick={cancelEdit}>Cancel</Button>
                                             </div>
                                         </td>

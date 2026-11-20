@@ -50,28 +50,28 @@ describe('getRatingColor', () => {
     test('should return correct colors for MAL ratings', () => {
         expect(getRatingColor(ArtifactType.ANIME, RatingType.MAL, 90)).toBe('green');
         expect(getRatingColor(ArtifactType.ANIME, RatingType.MAL, 80)).toBe('indigo');
-        expect(getRatingColor(ArtifactType.ANIME, RatingType.MAL, 70)).toBe('yellow');
+        expect(getRatingColor(ArtifactType.ANIME, RatingType.MAL, 70)).toBe('gray');
         expect(getRatingColor(ArtifactType.ANIME, RatingType.MAL, 60)).toBe('red');
     });
 
     test('should return correct colors for SensCritique ratings', () => {
         expect(getRatingColor(ArtifactType.MOVIE, RatingType.SENSCRITIQUE, 80)).toBe('green');
         expect(getRatingColor(ArtifactType.MOVIE, RatingType.SENSCRITIQUE, 72)).toBe('indigo');
-        expect(getRatingColor(ArtifactType.MOVIE, RatingType.SENSCRITIQUE, 65)).toBe('yellow');
+        expect(getRatingColor(ArtifactType.MOVIE, RatingType.SENSCRITIQUE, 65)).toBe('gray');
         expect(getRatingColor(ArtifactType.MOVIE, RatingType.SENSCRITIQUE, 55)).toBe('red');
     });
 
     test('should return correct colors for Steam ratings', () => {
         expect(getRatingColor(ArtifactType.GAME, RatingType.STEAM, 96)).toBe('green');
         expect(getRatingColor(ArtifactType.GAME, RatingType.STEAM, 92)).toBe('indigo');
-        expect(getRatingColor(ArtifactType.GAME, RatingType.STEAM, 87)).toBe('yellow');
+        expect(getRatingColor(ArtifactType.GAME, RatingType.STEAM, 87)).toBe('gray');
         expect(getRatingColor(ArtifactType.GAME, RatingType.STEAM, 80)).toBe('red');
     });
 
     test('should return correct colors for other rating types', () => {
         expect(getRatingColor(ArtifactType.MOVIE, RatingType.METACRITIC, 95)).toBe('green');
         expect(getRatingColor(ArtifactType.MOVIE, RatingType.METACRITIC, 85)).toBe('indigo');
-        expect(getRatingColor(ArtifactType.MOVIE, RatingType.METACRITIC, 75)).toBe('yellow');
+        expect(getRatingColor(ArtifactType.MOVIE, RatingType.METACRITIC, 75)).toBe('gray');
         expect(getRatingColor(ArtifactType.MOVIE, RatingType.METACRITIC, 65)).toBe('red');
     });
 });
@@ -80,7 +80,7 @@ describe('getMeanRatingColor', () => {
     test('should return correct colors for mean ratings', () => {
         expect(getMeanRatingColor(95)).toBe('green');
         expect(getMeanRatingColor(85)).toBe('indigo');
-        expect(getMeanRatingColor(75)).toBe('yellow');
+        expect(getMeanRatingColor(75)).toBe('gray');
         expect(getMeanRatingColor(65)).toBe('red');
     });
 });

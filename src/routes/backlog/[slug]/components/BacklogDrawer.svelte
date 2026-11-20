@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { tick } from "svelte";
     import { sineIn } from "svelte/easing";
     import { 
         Drawer,
@@ -28,22 +29,30 @@
     export let onMoveBacklogItem: (srcRank: number, targetRank: number) => Promise<void>;
     export let onFetchPrices: () => Promise<void>;
     export let onCreateTierList: (() => Promise<void>) | undefined = undefined;
+
+    const focusSelectedTab = async (event: CustomEvent & { currentTarget: HTMLDialogElement }) => {
+        const drawer = event.currentTarget;
+        await tick();
+        const focusedElement = drawer.ownerDocument.activeElement;
+        if (drawer.open && (focusedElement === drawer || focusedElement === drawer.querySelector('button[role="tab"]'))) {
+            drawer.querySelector<HTMLButtonElement>('button[role="tab"][aria-selected="true"]')?.focus();
+        }
+    };
 </script>
 
 <Drawer
     placement="right"
     transitionParams={transitionDrawerParams}
     bind:open={$pageStore.openDrawer}
+    onintrostart={focusSelectedTab}
     id="sidebar1"
-    class="w-full md:w-92 backdrop:bg-black/25"
+    class="app-drawer w-full backdrop:bg-black/25"
 >
     <Tabs
+        bind:selected={$pageStore.selectedTab}
         tabStyle="full"
-        style="align-items: center"
-        class="mr-8"
     >
         <BacklogDrawerTabFilters
-            bind:selectedTab={$pageStore.selectedTab}
             {genres}
             {backlogTags}
             {platforms}
@@ -52,11 +61,9 @@
             {onCreateTierList}
         />
         <BacklogDrawerTabAdd
-            bind:selectedTab={$pageStore.selectedTab}
             {canEdit}
         />
         <BacklogDrawerTabOrder
-            bind:selectedTab={$pageStore.selectedTab}
             canEdit={canEdit}
             {onMoveBacklogItem}
         />

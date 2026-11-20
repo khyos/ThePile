@@ -52,7 +52,7 @@
         oninput={fetchArtifacts}
     />
     {#if searchedArtifacts?.length > 0}
-        <Listgroup>
+        <Listgroup class="drawer-panel">
             {#each searchedArtifacts as artifact (artifact.id)}
                 {#if $userListStore.userList.artifacts.find((a) => a.id === artifact.id) != null}
                     <ListgroupItem>

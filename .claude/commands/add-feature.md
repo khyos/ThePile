@@ -2,7 +2,7 @@
 description: Add a new feature through the full team flow: PM clarifies requirements → Architect designs the solution → Developer implements → TDD tester writes contract tests → Standards tester writes code-based tests → Developer fixes if tests fail (loop) → Code reviewer reviews → Developer fixes if needed → Architect reviews → Developer fixes if needed → Security expert signs off. Each testing phase re-runs after developer fixes until all tests pass.
 ---
 
-You are orchestrating the **Add New Feature** flow for Backlog-FIUO.
+You are orchestrating the **Add New Feature** flow for ThePile.
 
 The user has described a feature to add. Work through the agents below in order. Do not skip a step. Each agent's output gates the next step.
 

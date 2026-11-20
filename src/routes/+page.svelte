@@ -1,167 +1,338 @@
 <script lang="ts">
-    import { Card } from "flowbite-svelte";
-    import { 
-        ClockSolid, 
-        RocketSolid, 
-        ForwardSolid,
+    import { resolve } from "$app/paths";
+    import {
+        RocketSolid,
         ClapperboardPlaySolid,
         ImageSolid,
         StarSolid,
         BookOpenSolid
     } from "flowbite-svelte-icons";
     import { ArtifactType } from "#lib/model/Artifact";
+
+    const categories = [
+        { type: ArtifactType.GAME, label: "Games", icon: RocketSolid },
+        { type: ArtifactType.MOVIE, label: "Movies", icon: ClapperboardPlaySolid },
+        { type: ArtifactType.TVSHOW, label: "TV Shows", icon: ImageSolid },
+        { type: ArtifactType.ANIME, label: "Anime", icon: StarSolid },
+        { type: ArtifactType.MANGA, label: "Manga", icon: BookOpenSolid }
+    ];
+
+    const sections = [
+        {
+            id: "current",
+            title: "Current Backlogs",
+            description: "What you're actively enjoying right now",
+            route: "/backlog/current/[slug]"
+        },
+        {
+            id: "future",
+            title: "Coming Soon",
+            description: "Upcoming releases to look forward to",
+            route: "/backlog/future/[slug]"
+        }
+    ] as const;
 </script>
 
 <svelte:head>
-    <title>Backlog - Your Entertainment Hub</title>
+    <title>ThePile - Your Entertainment Hub</title>
+    <meta name="description" content="Rank your entertainment backlog and decide what's next. Explore your current games, movies, TV shows, anime and manga, or discover upcoming releases." />
 </svelte:head>
 
-<div class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
-    <!-- Hero Section -->
-    <div class="relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 dark:from-blue-400/10 dark:to-purple-400/10"></div>
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div class="text-center">
-                <h1 class="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-                    Welcome to Your
-                    <span class="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-                        Backlog
-                    </span>
-                </h1>
-            </div>
-        </div>
+<div class="home">
+    <div class="hero">
+        <img src="/logo-med.png" class="hero-logo" width="104" height="104" alt="ThePile Logo" />
+        <h1>Welcome to <span class="brand-accent">ThePile</span></h1>
+        <p>Rank your backlog &bull; Decide what's next</p>
     </div>
 
-    <!-- Stats Section -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="backlog-grid">
+        {#each sections as section (section.id)}
+            <section class="backlog-card" aria-labelledby="{section.id}-title">
+                <div class="section-icon {section.id}" aria-hidden="true">
+                    {#if section.id === "current"}
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" />
+                            <path d="M10 7.5 16 12l-6 4.5V7.5Z" fill="currentColor" />
+                        </svg>
+                    {:else}
+                        <RocketSolid class="h-7 w-7" />
+                    {/if}
+                </div>
+                <h2 id="{section.id}-title">{section.title}</h2>
+                <p class="section-description">{section.description}</p>
+                <div class="section-divider" aria-hidden="true"></div>
 
-        <!-- Enhanced Quick Access Grid -->
-        <div class="flex justify-center mb-20">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-3xl">
-                <!-- Current Backlogs Section -->
-                <Card class="group relative overflow-hidden bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 dark:from-emerald-900/20 dark:via-blue-900/20 dark:to-purple-900/20 border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-1 h-fit">
-                    <!-- Animated background overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-400/10 via-blue-400/10 to-purple-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <div class="relative z-10 p-8">
-                        <div class="text-center mb-8">
-                            <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-500 shadow-lg mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                                <ClockSolid class="w-8 h-8 text-white" />
-                            </div>
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Current Backlogs</h2>
-                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">What you're actively enjoying right now</p>
-                            <div class="h-1 w-16 bg-gradient-to-r from-emerald-400 to-green-500 rounded-full mx-auto"></div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/backlog/current/{ArtifactType.GAME}" class="group/btn relative overflow-hidden">
-                                <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-rotate-1">
-                                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                    <RocketSolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                    <span class="text-sm font-semibold text-white relative z-10">Games</span>
-                                </div>
-                            </a>
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/backlog/current/{ArtifactType.MOVIE}" class="group/btn relative overflow-hidden">
-                                <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-1">
-                                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                    <ClapperboardPlaySolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                    <span class="text-sm font-semibold text-white relative z-10">Movies</span>
-                                </div>
-                            </a>
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/backlog/current/{ArtifactType.TVSHOW}" class="group/btn relative overflow-hidden">
-                                <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-1">
-                                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                    <ImageSolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                    <span class="text-sm font-semibold text-white relative z-10">TV Shows</span>
-                                </div>
-                            </a>
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/backlog/current/{ArtifactType.ANIME}" class="group/btn relative overflow-hidden">
-                                <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-rotate-1">
-                                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                    <StarSolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                    <span class="text-sm font-semibold text-white relative z-10">Anime</span>
-                                </div>
-                            </a>
-                            <div class="col-span-2 flex justify-center">
-                                <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                <a href="/backlog/current/{ArtifactType.MANGA}" class="group/btn relative overflow-hidden w-[calc(50%-0.5rem)]">
-                                    <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-1">
-                                        <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                        <BookOpenSolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                        <span class="text-sm font-semibold text-white relative z-10">Manga</span>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-
-                <!-- Coming Soon Section -->
-                <Card class="group relative overflow-hidden bg-gradient-to-br from-indigo-50 via-cyan-50 to-teal-50 dark:from-indigo-900/20 dark:via-cyan-900/20 dark:to-teal-900/20 border-0 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:-translate-y-1 h-fit">
-                    <!-- Animated background overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-400/10 via-cyan-400/10 to-teal-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <div class="relative z-10 p-8">
-                        <div class="text-center mb-8">
-                            <div class="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-400 to-cyan-500 shadow-lg mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                                <ForwardSolid class="w-8 h-8 text-white" />
-                            </div>
-                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">Coming Soon</h2>
-                            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Upcoming releases to look forward to</p>
-                            <div class="h-1 w-16 bg-gradient-to-r from-indigo-400 to-cyan-500 rounded-full mx-auto"></div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/backlog/future/{ArtifactType.GAME}" class="group/btn relative overflow-hidden">
-                                <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-rotate-1">
-                                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                    <RocketSolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                    <span class="text-sm font-semibold text-white relative z-10">Games</span>
-                                </div>
-                            </a>
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/backlog/future/{ArtifactType.MOVIE}" class="group/btn relative overflow-hidden">
-                                <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-1">
-                                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                    <ClapperboardPlaySolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                    <span class="text-sm font-semibold text-white relative z-10">Movies</span>
-                                </div>
-                            </a>
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/backlog/future/{ArtifactType.TVSHOW}" class="group/btn relative overflow-hidden">
-                                <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-teal-500 to-green-600 hover:from-teal-600 hover:to-green-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-1">
-                                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                    <ImageSolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                    <span class="text-sm font-semibold text-white relative z-10">TV Shows</span>
-                                </div>
-                            </a>
-                            <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/backlog/future/{ArtifactType.ANIME}" class="group/btn relative overflow-hidden">
-                                <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:-rotate-1">
-                                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                    <StarSolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                    <span class="text-sm font-semibold text-white relative z-10">Anime</span>
-                                </div>
-                            </a>
-                            <div class="col-span-2 flex justify-center">
-                                <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                                <a href="/backlog/future/{ArtifactType.MANGA}" class="group/btn relative overflow-hidden w-[calc(50%-0.5rem)]">
-                                    <div class="relative h-24 flex flex-col items-center justify-center space-y-2 bg-gradient-to-br from-pink-500 to-fuchsia-600 hover:from-pink-600 hover:to-fuchsia-700 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 hover:rotate-1">
-                                        <div class="absolute inset-0 bg-white/20 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                                        <BookOpenSolid class="w-6 h-6 text-white relative z-10 group-hover/btn:scale-110 transition-transform duration-300" />
-                                        <span class="text-sm font-semibold text-white relative z-10">Manga</span>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </Card>
-            </div>
-        </div>
+                <div class="category-grid">
+                    {#each categories as category (category.type)}
+                        {@const Icon = category.icon}
+                        <a
+                            href={resolve(section.route, { slug: category.type })}
+                            class="category-tile {category.type}"
+                        >
+                            <span class="category-watermark" aria-hidden="true">
+                                <Icon class="h-16 w-16" />
+                            </span>
+                            <span class="category-icon" aria-hidden="true">
+                                <Icon class="h-4 w-4" />
+                            </span>
+                            <span>{category.label}</span>
+                        </a>
+                    {/each}
+                </div>
+            </section>
+        {/each}
     </div>
 </div>
+
+<style>
+    .home {
+        min-height: calc(100svh - var(--header-space));
+        padding: 36px 20px;
+        background:
+            radial-gradient(ellipse at 100% 0%, #ffdec34d, transparent 34%),
+            radial-gradient(ellipse at 0% 100%, #ffd6ce66, transparent 32%),
+            linear-gradient(125deg, #f7fafc, #f4f4fc 50%, #ebedfa);
+    }
+
+    .hero {
+        margin-bottom: 24px;
+        text-align: center;
+    }
+
+    .hero-logo {
+        margin: 0 auto 16px;
+        object-fit: contain;
+        filter: drop-shadow(0 12px 14px #a33b252b);
+    }
+
+    h1 {
+        margin: 0 0 4px;
+        font-size: clamp(30px, 4vw, 44px);
+        font-weight: 750;
+        letter-spacing: -1.4px;
+        line-height: 1.25;
+    }
+
+    .hero p {
+        color: var(--app-muted);
+        font-size: 18px;
+        line-height: 1.6;
+    }
+
+    .backlog-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+        max-width: 620px;
+        margin: 0 auto;
+    }
+
+    .backlog-card {
+        position: relative;
+        overflow: hidden;
+        padding: 22px;
+        border: 1px solid #ffffffb3;
+        border-radius: 13px;
+        background: #ffffffed;
+        box-shadow: 0 14px 24px #252b481f;
+        text-align: center;
+    }
+
+    .section-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        margin: 0 auto 12px;
+        border-radius: 15px;
+    }
+
+    .current {
+        color: #40984f;
+        background: linear-gradient(135deg, #d6edd8, #bce2c5);
+        box-shadow: 0 7px 17px #75be7933;
+    }
+
+    .future {
+        color: white;
+        background: linear-gradient(135deg, #8684ec, #2eafd0);
+        box-shadow: 0 7px 17px #7283d940;
+    }
+
+    h2 {
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        line-height: 1.4;
+    }
+
+    .section-description {
+        margin-top: 3px;
+        color: var(--app-muted);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .section-divider {
+        width: 48px;
+        height: 2px;
+        margin: 10px auto 18px;
+        border-radius: 2px;
+        background: #e8e9ef;
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .category-tile {
+        position: relative;
+        display: flex;
+        overflow: hidden;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 64px;
+        border: 1px solid #ffffff1a;
+        border-radius: 10px;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.4;
+        transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .category-tile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 14px #1d25432b;
+    }
+
+    .category-tile:focus-visible {
+        outline: 3px solid var(--app-text);
+        outline-offset: 3px;
+    }
+
+    .category-tile > span:not(.category-watermark) {
+        position: relative;
+    }
+
+    .category-watermark {
+        position: absolute;
+        right: -9px;
+        bottom: -8px;
+        opacity: 0;
+        transform: rotate(-12deg);
+    }
+
+    .game {
+        --tile-glow: #305be940;
+        background: linear-gradient(125deg, #3275e5, #342da6);
+    }
+
+    .movie {
+        --tile-glow: #b91cd940;
+        background: linear-gradient(125deg, #9553ed, #c807a8);
+    }
+
+    .tvshow {
+        --tile-glow: #20bb9140;
+        background: linear-gradient(125deg, #2db6a7, #15946d);
+    }
+
+    .anime {
+        --tile-glow: #ff652d40;
+        background: linear-gradient(125deg, #ff8b1c, #ff373e);
+    }
+
+    .manga {
+        --tile-glow: #e929a440;
+        grid-column: 1 / -1;
+        justify-self: center;
+        width: calc((100% - 10px) / 2);
+        background: linear-gradient(125deg, #fa5486, #e51cc1);
+    }
+
+    :global(.dark) .home {
+        padding-top: 12px;
+        background:
+            radial-gradient(ellipse at 50% 15%, #b55b1712, transparent 30%),
+            #0b111e;
+    }
+
+    :global(.dark) .hero-logo {
+        filter: drop-shadow(0 0 28px #ef721a59);
+    }
+
+    :global(.dark) .backlog-card {
+        border-color: #ffffff0d;
+        background: linear-gradient(155deg, #1b2335, #171f30);
+        box-shadow: 0 16px 28px #00000040, 0 -8px 24px #f16c3912;
+    }
+
+    :global(.dark) .backlog-card::before {
+        position: absolute;
+        inset: 0 0 auto;
+        height: 3px;
+        background: linear-gradient(90deg, #ff983f, #f35271);
+        box-shadow: 0 0 30px 7px #f5764933;
+        content: "";
+    }
+
+    :global(.dark) .current {
+        color: #8feb6a;
+        background: linear-gradient(135deg, #42635399, #274c4380);
+        box-shadow: 0 0 24px #69d66e26, inset 0 0 0 1px #b4ffc21a;
+    }
+
+    :global(.dark) .future {
+        color: #ff895d;
+        background: linear-gradient(135deg, #664b4f99, #49313f99);
+        box-shadow: 0 0 24px #f4775326, inset 0 0 0 1px #ffc6a31a;
+    }
+
+    :global(.dark) .section-divider {
+        background: #ffffff14;
+    }
+
+    :global(.dark) .category-tile {
+        box-shadow: 0 5px 18px var(--tile-glow), inset 0 0 0 1px #ffffff0a;
+    }
+
+    :global(.dark) .category-watermark {
+        opacity: 0.12;
+    }
+
+    @media (max-width: 639px) {
+        .home {
+            padding: 30px 20px 40px;
+        }
+
+        :global(.dark) .home {
+            padding-top: 24px;
+        }
+
+        .hero p {
+            font-size: 15px;
+        }
+
+        .backlog-grid {
+            grid-template-columns: 1fr;
+            max-width: 320px;
+            gap: 20px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .category-tile {
+            transition: none;
+        }
+
+        .category-tile:hover {
+            transform: none;
+        }
+    }
+</style>

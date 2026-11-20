@@ -16,17 +16,17 @@ export function getRatingColor(artifactType: ArtifactType, ratingType: RatingTyp
         case RatingType.MAL:
             if (rating >= 85) return "green";
             if (rating >= 75) return "indigo";
-            if (rating >= 65) return "yellow";
+            if (rating >= 65) return "gray";
             return "red";
         case RatingType.SENSCRITIQUE:
             if (rating >= 75) return "green";
             if (rating >= 70) return "indigo";
-            if (rating >= 60) return "yellow";
+            if (rating >= 60) return "gray";
             return "red";
         case RatingType.STEAM:
             if (rating >= 95) return "green";
             if (rating >= 90) return "indigo";
-            if (rating >= 85) return "yellow";
+            if (rating >= 85) return "gray";
             return "red";
         case RatingType.METACRITIC:
         case RatingType.OPENCRITIC:
@@ -35,7 +35,7 @@ export function getRatingColor(artifactType: ArtifactType, ratingType: RatingTyp
         default:
             if (rating >= 90) return "green";
             if (rating >= 80) return "indigo";
-            if (rating >= 70) return "yellow";
+            if (rating >= 70) return "gray";
             return "red";
     }
 }
@@ -43,7 +43,7 @@ export function getRatingColor(artifactType: ArtifactType, ratingType: RatingTyp
 export function getMeanRatingColor(rating: number) {
     if (rating >= 90) return "green";
     if (rating >= 80) return "indigo";
-    if (rating >= 70) return "yellow";
+    if (rating >= 70) return "gray";
     return "red";
 }
 

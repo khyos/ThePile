@@ -8,10 +8,8 @@
         ListgroupItem,
         Modal,
         Select,
-        Toast,
     } from "flowbite-svelte";
     import {
-        CheckCircleSolid,
         PlusOutline,
     } from "flowbite-svelte-icons";
     import { Tag } from "#lib/model/Tag";
@@ -20,30 +18,17 @@
     import { fetchPrices } from "#lib/services/PricesService";
     import type { Price } from "#lib/types/itad/Price";
     import BacklogDrawer from "./components/BacklogDrawer.svelte";
-    import { TimeUtil } from "#lib/util/TimeUtil";
+    import BacklogHeader from "./components/BacklogHeader.svelte";
     import BacklogItemComp from "./components/BacklogItemComp.svelte";
-    import { pageStore, hideMoveToBacklog, hideMoveToRank, toggleDrawer } from "./stores/PageStore";
-    import { copyAiPrompt, filteredBacklogItems, initializeStore, refreshBacklog } from "./stores/BacklogStore";
+    import { pageStore, hideMoveToBacklog, hideMoveToRank } from "./stores/PageStore";
+    import { filteredBacklogItems, initializeStore, refreshBacklog } from "./stores/BacklogStore";
     import { tagStore } from "./stores/TagStore";
     import { Genre } from "#lib/model/Genre";
     import { Platform } from "#lib/model/game/Platform";
     import { get } from "svelte/store";
     import { addTag, createTag, fetchTags } from "./actions/TagActions";
-    import { onMount } from "svelte";
 
     export let data: PageData;
-
-    let isStuck = false;
-    let sentinel: HTMLElement;
-
-    onMount(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => { isStuck = !entry.isIntersecting; },
-            { threshold: [1] }
-        );
-        observer.observe(sentinel);
-        return () => observer.disconnect();
-    });
 
     initializeStore(data.backlog);
 
@@ -61,10 +46,6 @@
 
     let keepTagsSelected: boolean = false;
     let moveToBacklogSelected: number;
-
-    let totalTime = data.backlog.backlogItems.reduce((acc, item) => {
-        return acc + item.artifact.duration;
-    }, 0);
 
     const deleteBacklogItemCb = async (e: MouseEvent) => {
         const artifactIdStr = (e.currentTarget as HTMLElement)?.getAttribute("data-id");
@@ -127,28 +108,8 @@
     }
 </script>
 
-<div bind:this={sentinel} class="h-px -mb-px"></div>
 <Listgroup>
-    <div class="flex p-1 sticky top-0 z-10 transition-[background-color,box-shadow] duration-150
-        {isStuck ? 'bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm' : ''}">
-        <h3
-            class="p-1 text-xl font-medium text-gray-900 dark:text-white"
-            style="flex-grow: 1; padding-left: 1rem"
-        >
-            {data.backlog.title} ({TimeUtil.formatDuration(totalTime)})
-        </h3>
-        {#if $pageStore.isCopiedToastVisible}
-            <Toast class="fixed bottom-4 left-1/2 transform -translate-x-1/2" params={{ delay: 250, duration: 1000 }} dismissable={false}>
-                {#snippet icon()}
-                    <CheckCircleSolid class="h-6 w-6" />
-                {/snippet}
-                Copied !
-            </Toast>
-        {/if}
-
-        <Button size="xs" class="mr-1" onclick={copyAiPrompt}>AI</Button>
-        <Button size="xs" onclick={toggleDrawer}>Filters / Add</Button>
-    </div>
+    <BacklogHeader canEdit={data.canEdit} />
     {#each $filteredBacklogItems as backlogItem (backlogItem.artifact.id)}
         <ListgroupItem>
             <BacklogItemComp
@@ -200,7 +161,7 @@
 </Modal>
 
 <Modal size="xs" title="Move to Rank" bind:open={$pageStore.showMoveToRank} autoclose>
-    Move <Badge class="mr-2 gap-1" color="blue"># {$pageStore.selectedBacklogItem!.rank}</Badge><b>{$pageStore.selectedBacklogItem!.artifact.title}</b> to
+    Move <Badge class="mr-2 gap-1" color="primary"># {$pageStore.selectedBacklogItem!.rank}</Badge><b>{$pageStore.selectedBacklogItem!.artifact.title}</b> to
     <Select class="mt-2" items={backlogItemsForSelect} bind:value={moveToRankSelected} />
     <Button class="mt-2" onclick={() => {
         moveBacklogItem($pageStore.selectedBacklogItem!.rank, moveToRankSelected).then(() => {
@@ -210,7 +171,7 @@
 </Modal>
 
 <Modal size="xs" title="Move to Backlog" bind:open={$pageStore.showMoveToBacklog} autoclose>
-    Move <Badge class="mr-2 gap-1" color="blue"># {$pageStore.selectedBacklogItem!.rank}</Badge><b>{$pageStore.selectedBacklogItem!.artifact.title}</b> to
+    Move <Badge class="mr-2 gap-1" color="primary"># {$pageStore.selectedBacklogItem!.rank}</Badge><b>{$pageStore.selectedBacklogItem!.artifact.title}</b> to
     <Select class="mt-2" items={$pageStore.backlogsForSelect} bind:value={moveToBacklogSelected} />
     <Checkbox bind:checked={keepTagsSelected}>Keep tags</Checkbox>
     <Button class="mt-2" onclick={() => {

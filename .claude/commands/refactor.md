@@ -2,7 +2,7 @@
 description: Refactor existing code through the team flow (no PM): Architect clarifies the refactoring goal → Developer implements → TDD tester writes contract tests → Standards tester writes code-based tests → Developer fixes if tests fail (loop) → Code reviewer reviews → Developer fixes if needed → Architect reviews → Developer fixes if needed → Security expert signs off.
 ---
 
-You are orchestrating the **Refactoring** flow for Backlog-FIUO.
+You are orchestrating the **Refactoring** flow for ThePile.
 
 The user has described what to refactor. Work through the agents below in order. Do not skip a step. Each agent's output gates the next step.
 
