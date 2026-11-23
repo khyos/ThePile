@@ -218,3 +218,31 @@ body {
         --header-space: 80px;
     }
 }
+
+/* Drag & drop insertion indicator for reorderable (rank) backlog rows */
+.drop-before,
+.drop-after {
+    position: relative;
+}
+
+.drop-before::after,
+.drop-after::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--app-accent);
+    box-shadow: 0 0 6px var(--app-accent);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.drop-before::after {
+    top: -2px;
+}
+
+.drop-after::after {
+    bottom: -2px;
+}

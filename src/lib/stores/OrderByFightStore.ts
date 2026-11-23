@@ -134,23 +134,34 @@ export const updateItemA = async () => {
 export const getRandomItemB = async () => {
     const backlog = get(backlogStore).backlog;
     const store = get(orderByFightStore);
-    let itemB;
-    do {
-        if (store.similarElo) {
-            const eloFilteredBacklog = backlog.backlogItems.filter(bi => bi.elo > store.itemA!.elo - 100 && bi.elo < store.itemA!.elo + 100);
-            let randomIndex;
-            if (eloFilteredBacklog.length > 1) {
-                randomIndex = OrderUtil.getRandomIntegerBetween(0, eloFilteredBacklog.length - 1);
-                itemB = eloFilteredBacklog[randomIndex];
-            } else {
-                randomIndex = OrderUtil.getRandomIntegerBetween(store.highestValue - 1, store.lowestValue - 1);
-                itemB = backlog.backlogItems[randomIndex];
-            }
-        } else {
-            const randomIndex = OrderUtil.getRandomIntegerBetween(store.highestValue - 1, store.lowestValue - 1);
-            itemB = backlog.backlogItems[randomIndex];
+    const itemCount = backlog.backlogItems.length;
+
+    // Clamp the search window to valid rank bounds so narrowing past the ends
+    // (e.g. lowestValue reaching 0) can't produce out-of-range indices.
+    const high = Math.max(1, Math.min(store.highestValue, itemCount));
+    const low = Math.min(itemCount, Math.max(store.lowestValue, 1));
+
+    let itemB: BacklogItem | undefined;
+    if (store.similarElo && store.itemA) {
+        const eloFiltered = backlog.backlogItems.filter(bi =>
+            bi.artifact.id !== store.itemA!.artifact.id
+            && bi.elo > store.itemA!.elo - 100
+            && bi.elo < store.itemA!.elo + 100
+        );
+        if (eloFiltered.length > 0) {
+            itemB = eloFiltered[OrderUtil.getRandomIntegerBetween(0, eloFiltered.length - 1)];
         }
-    } while (itemB?.artifact.id === store.itemA?.artifact.id);
+    }
+    if (!itemB) {
+        // Candidates are the items inside the window, excluding itemA itself.
+        // When none remain, the search is exhausted and itemB stays undefined.
+        const candidates = backlog.backlogItems
+            .slice(high - 1, low)
+            .filter(bi => bi.artifact.id !== store.itemA?.artifact.id);
+        if (candidates.length > 0) {
+            itemB = candidates[OrderUtil.getRandomIntegerBetween(0, candidates.length - 1)];
+        }
+    }
     orderByFightStore.update(s => ({
         ...s,
         itemB

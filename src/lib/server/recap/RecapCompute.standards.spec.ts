@@ -68,24 +68,25 @@ describe('only non-main type entries present', () => {
         expect(slides.some(s => s.kind === 'highest_rated')).toBe(false);
     });
 
-    it('still counts non-main entries in monthly bars', () => {
+    it('excludes episode/chapter entries from monthly bars', () => {
         const entries = [
             makeEntry({ id: 1, type: ArtifactType.ANIME_EPISODE, endDate: ts(2024, 3, 10) }),
-            makeEntry({ id: 2, type: ArtifactType.MANGA_CHAPTER, endDate: ts(2024, 3, 20) })
+            makeEntry({ id: 2, type: ArtifactType.MANGA_CHAPTER, endDate: ts(2024, 3, 20) }),
+            makeEntry({ id: 3, type: ArtifactType.GAME, endDate: ts(2024, 3, 25) }) // counted
         ];
         const slides = buildRecapSlides(2024, entries, [], []);
         const monthly = slides.find(s => s.kind === 'monthly') as Extract<RecapSlide, { kind: 'monthly' }>;
-        expect(monthly.bars[3].value).toBe(2); // April (index 3)
+        expect(monthly.bars[3].value).toBe(1); // April — only the game is counted
     });
 
-    it('still counts non-main entries in grand_total', () => {
+    it('episode/chapter entries add duration but are not counted', () => {
         const entries = [
             makeEntry({ id: 1, type: ArtifactType.ANIME_EPISODE, duration: 500 }),
             makeEntry({ id: 2, type: ArtifactType.MANGA_CHAPTER, duration: 300 })
         ];
         const slides = buildRecapSlides(2024, entries, [], []);
         const grand = slides.find(s => s.kind === 'grand_total') as Extract<RecapSlide, { kind: 'grand_total' }>;
-        expect(grand.totalCount).toBe(2);
+        expect(grand.totalCount).toBe(0);
         expect(grand.totalDuration).toBe(800);
     });
 });
@@ -414,50 +415,40 @@ describe('score = 0 is valid and not treated as null', () => {
     });
 });
 
-// ─── Group 10: classics_vs_new counts all entry types (not just main) ─────────
+// ─── Group 10: classics_vs_new uses counted types only ───────────────────────
 
-describe('classics_vs_new counts non-main type entries', () => {
+describe('classics_vs_new uses counted types only', () => {
     const year = 2024;
 
-    it('new non-main entries count as new', () => {
+    it('counted non-main entries (seasons, volumes, anime) tier by release date', () => {
         const entries = [
-            makeEntry({ id: 1, type: ArtifactType.ANIME_EPISODE, releaseDate: ts(year, 3, 1) }), // new
-            makeEntry({ id: 2, type: ArtifactType.TVSHOW_EPISODE, releaseDate: ts(year, 5, 1) }) // new
+            makeEntry({ id: 1, type: ArtifactType.TVSHOW_SEASON, releaseDate: ts(year, 3, 1) }),    // new
+            makeEntry({ id: 2, type: ArtifactType.MANGA_VOLUME,  releaseDate: ts(year - 2, 0, 1) }), // recent
+            makeEntry({ id: 3, type: ArtifactType.ANIME,         releaseDate: ts(2015, 0, 1) })      // classic
         ];
         const slides = buildRecapSlides(year, entries, [], []);
         const slide = slides.find(s => s.kind === 'classics_vs_new') as Extract<RecapSlide, { kind: 'classics_vs_new' }>;
-        expect(slide.newCount).toBe(2);
+        expect(slide.newCount).toBe(1);
+        expect(slide.recentCount).toBe(1);
+        expect(slide.classicCount).toBe(1);
+    });
+
+    it('excludes episode/chapter and top-level show/manga entries', () => {
+        const entries = [
+            makeEntry({ id: 1, type: ArtifactType.ANIME_EPISODE, releaseDate: ts(year, 3, 1) }), // not counted
+            makeEntry({ id: 2, type: ArtifactType.MANGA_CHAPTER, releaseDate: ts(year, 5, 1) }), // not counted
+            makeEntry({ id: 3, type: ArtifactType.GAME,          releaseDate: ts(year, 2, 1) })  // counted, new
+        ];
+        const slides = buildRecapSlides(year, entries, [], []);
+        const slide = slides.find(s => s.kind === 'classics_vs_new') as Extract<RecapSlide, { kind: 'classics_vs_new' }>;
+        expect(slide.newCount).toBe(1);
         expect(slide.recentCount).toBe(0);
         expect(slide.classicCount).toBe(0);
     });
 
-    it('recent non-main entries count as recent', () => {
+    it('sentinel release date is treated as classic for a counted entry', () => {
         const entries = [
-            makeEntry({ id: 1, type: ArtifactType.MANGA_CHAPTER, releaseDate: ts(year - 2, 0, 1) }), // recent
-            makeEntry({ id: 2, type: ArtifactType.MANGA_VOLUME, releaseDate: ts(year - 4, 6, 1) })    // recent
-        ];
-        const slides = buildRecapSlides(year, entries, [], []);
-        const slide = slides.find(s => s.kind === 'classics_vs_new') as Extract<RecapSlide, { kind: 'classics_vs_new' }>;
-        expect(slide.recentCount).toBe(2);
-        expect(slide.newCount).toBe(0);
-        expect(slide.classicCount).toBe(0);
-    });
-
-    it('classic non-main entries count as classic', () => {
-        const entries = [
-            makeEntry({ id: 1, type: ArtifactType.MANGA_CHAPTER, releaseDate: ts(2015, 0, 1) }),
-            makeEntry({ id: 2, type: ArtifactType.MANGA_VOLUME, releaseDate: ts(2018, 6, 1) })
-        ];
-        const slides = buildRecapSlides(year, entries, [], []);
-        const slide = slides.find(s => s.kind === 'classics_vs_new') as Extract<RecapSlide, { kind: 'classics_vs_new' }>;
-        expect(slide.classicCount).toBe(2);
-        expect(slide.recentCount).toBe(0);
-        expect(slide.newCount).toBe(0);
-    });
-
-    it('sentinel release date in a non-main entry is treated as classic', () => {
-        const entries = [
-            makeEntry({ id: 1, type: ArtifactType.MANGA_CHAPTER, releaseDate: RELEASE_DATE_SENTINEL })
+            makeEntry({ id: 1, type: ArtifactType.MANGA_VOLUME, releaseDate: RELEASE_DATE_SENTINEL })
         ];
         const slides = buildRecapSlides(year, entries, [], []);
         const slide = slides.find(s => s.kind === 'classics_vs_new') as Extract<RecapSlide, { kind: 'classics_vs_new' }>;
@@ -509,8 +500,8 @@ describe('grand_total with mixed durations including 0', () => {
         const entries = [
             makeEntry({ id: 1, type: ArtifactType.GAME, duration: 0 }),
             makeEntry({ id: 2, type: ArtifactType.MOVIE, duration: 500 }),
-            makeEntry({ id: 3, type: ArtifactType.ANIME, duration: 0 }),
-            makeEntry({ id: 4, type: ArtifactType.MANGA, duration: 250 })
+            makeEntry({ id: 3, type: ArtifactType.ANIME_EPISODE, duration: 0 }),
+            makeEntry({ id: 4, type: ArtifactType.MANGA_CHAPTER, duration: 250 })
         ];
         const slides = buildRecapSlides(2024, entries, [], []);
         const grand = slides.find(s => s.kind === 'grand_total') as Extract<RecapSlide, { kind: 'grand_total' }>;
@@ -705,7 +696,7 @@ describe('best_week rolling window computation', () => {
             makeEntry({ id: 1, type: ArtifactType.GAME,  endDate: base }),                      // window A: 1 entry
             makeEntry({ id: 2, type: ArtifactType.MOVIE, endDate: base + 20 * DAY_MS }),        // window B start
             makeEntry({ id: 3, type: ArtifactType.ANIME, endDate: base + 21 * DAY_MS }),        // window B
-            makeEntry({ id: 4, type: ArtifactType.MANGA, endDate: base + 22 * DAY_MS })         // window B
+            makeEntry({ id: 4, type: ArtifactType.COMICS, endDate: base + 22 * DAY_MS })        // window B
         ];
         const slides = buildRecapSlides(2024, entries, [], []);
         const slide = slides.find(s => s.kind === 'best_week') as Extract<RecapSlide, { kind: 'best_week' }>;
@@ -713,7 +704,7 @@ describe('best_week rolling window computation', () => {
         expect(slide.weekStart).toBe(base + 20 * DAY_MS);
     });
 
-    it('uses ALL entry types, not just main types', () => {
+    it('excludes episode/chapter entries from the rolling window', () => {
         const base = ts(2024, 3, 1);
         const entries = [
             makeEntry({ id: 1, type: ArtifactType.ANIME_EPISODE,  endDate: base }),
@@ -721,7 +712,7 @@ describe('best_week rolling window computation', () => {
             makeEntry({ id: 3, type: ArtifactType.MANGA_CHAPTER,  endDate: base + 2 * DAY_MS })
         ];
         const slides = buildRecapSlides(2024, entries, [], []);
-        const slide = slides.find(s => s.kind === 'best_week') as Extract<RecapSlide, { kind: 'best_week' }>;
-        expect(slide.count).toBe(3);
+        // None are counted → fewer than 2 counted completions → slide omitted
+        expect(slides.some(s => s.kind === 'best_week')).toBe(false);
     });
 });
