@@ -9,6 +9,36 @@ const MAIN_ARTIFACT_TYPES: ArtifactType[] = [
 	ArtifactType.MANGA
 ];
 
+// Types counted towards the grand total: one entry per TV show season, per manga
+// volume, and per anime (never per episode), plus standalone media.
+const COUNT_TYPES: ArtifactType[] = [
+	ArtifactType.GAME,
+	ArtifactType.MOVIE,
+	ArtifactType.COMICS,
+	ArtifactType.ANIME,
+	ArtifactType.TVSHOW_SEASON,
+	ArtifactType.MANGA_VOLUME
+];
+
+// Types summed towards total duration: only the lowest level of each hierarchy, so
+// parent durations (which are aggregates of their children) are not double-counted.
+const DURATION_TYPES: ArtifactType[] = [
+	ArtifactType.GAME,
+	ArtifactType.MOVIE,
+	ArtifactType.COMICS,
+	ArtifactType.TVSHOW_EPISODE,
+	ArtifactType.ANIME_EPISODE,
+	ArtifactType.MANGA_CHAPTER
+];
+
+function countedEntriesOf(entries: RecapEntry[]): RecapEntry[] {
+	return entries.filter(e => COUNT_TYPES.includes(e.type));
+}
+
+function sumDuration(entries: RecapEntry[]): number {
+	return entries.reduce((sum, e) => DURATION_TYPES.includes(e.type) ? sum + e.duration : sum, 0);
+}
+
 const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const RELEASE_DATE_SENTINEL = 7258118400000;
@@ -56,8 +86,9 @@ export function buildRecapSlides(
 	const slides: RecapSlide[] = [opening];
 
 	// Slide 2: Grand total
-	const totalCount = currentEntries.length;
-	const totalDuration = currentEntries.reduce((sum, e) => sum + e.duration, 0);
+	const currentCounted = countedEntriesOf(currentEntries);
+	const totalCount = currentCounted.length;
+	const totalDuration = sumDuration(currentEntries);
 	slides.push({ kind: 'grand_total', totalCount, totalDuration });
 
 	// Slide 3: By type (MAIN types only)
@@ -84,11 +115,11 @@ export function buildRecapSlides(
 		slides.push({ kind: 'top_genres', genres });
 	}
 
-	// Slide 5: Monthly completions (ALL types)
+	// Slide 5: Monthly completions (counted types only)
 	const bars = MONTH_SHORT.map((label, month) => {
 		const monthStart = new Date(year, month, 1).getTime();
 		const monthEnd = new Date(year, month + 1, 0, 23, 59, 59, 999).getTime();
-		const value = currentEntries.filter(e => e.endDate >= monthStart && e.endDate <= monthEnd).length;
+		const value = currentCounted.filter(e => e.endDate >= monthStart && e.endDate <= monthEnd).length;
 		return { label, showLabel: true, value };
 	});
 	slides.push({ kind: 'monthly', bars });
@@ -98,8 +129,8 @@ export function buildRecapSlides(
 	const priorSummary = priorEntries.length > 0
 		? {
 			year: year - 1,
-			totalCount: priorEntries.length,
-			totalDuration: priorEntries.reduce((sum, e) => sum + e.duration, 0)
+			totalCount: countedEntriesOf(priorEntries).length,
+			totalDuration: sumDuration(priorEntries)
 		}
 		: null;
 	slides.push({ kind: 'year_comparison', current: currentSummary, prior: priorSummary });
@@ -144,15 +175,15 @@ export function buildRecapSlides(
 		slides.push({ kind: 'longest', items });
 	}
 
-	// Slide 10: Classics vs new releases (ALL entries)
-	const newCount = currentEntries.filter(e =>
+	// Slide 10: Classics vs new releases (counted types only)
+	const newCount = currentCounted.filter(e =>
 		new Date(e.releaseDate).getFullYear() === year && e.releaseDate < RELEASE_DATE_SENTINEL
 	).length;
-	const recentCount = currentEntries.filter(e => {
+	const recentCount = currentCounted.filter(e => {
 		const releaseYear = new Date(e.releaseDate).getFullYear();
 		return releaseYear > (year - 5) && releaseYear < year && e.releaseDate < RELEASE_DATE_SENTINEL;
 	}).length;
-	const classicCount = currentEntries.length - newCount - recentCount;
+	const classicCount = currentCounted.length - newCount - recentCount;
 	slides.push({ kind: 'classics_vs_new', newCount, recentCount, classicCount });
 
 	// Slide: Binge vs slow burn (MAIN types with non-null startDate only)
@@ -216,8 +247,8 @@ export function buildRecapSlides(
 		slides.push({ kind: 'avg_score_by_type', scores: avgScoreByType });
 	}
 
-	// Slide: Best week — 7-day rolling window with most completions (ALL types)
-	const sortedByEnd = [...currentEntries].sort((a, b) => a.endDate - b.endDate);
+	// Slide: Best week — 7-day rolling window with most completions (counted types only)
+	const sortedByEnd = [...currentCounted].sort((a, b) => a.endDate - b.endDate);
 	let bestWeekStart = 0;
 	let bestWeekCount = 0;
 	for (let i = 0; i < sortedByEnd.length; i++) {

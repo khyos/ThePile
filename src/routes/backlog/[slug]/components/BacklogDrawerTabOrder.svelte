@@ -81,17 +81,16 @@
                 lowestValue: store.itemB!.rank - 1
             }));
 
-            let backlogStoreInst = get(backlogStore);
-            
             if (store.itemB.rank < store.itemA.rank) {
                 await onMoveBacklogItem(store.itemA.rank, store.itemB.rank);
-                let newItemA = backlogStoreInst.backlog.backlogItems[store.itemB.rank - 1];
-                orderByFightStore.update(s => ({
-                    ...s,
-                    itemA: newItemA
-                }));
+                // Re-read itemA from the refreshed backlog (same artifact, new rank)
+                await updateItemA();
             }
             await getRandomItemB();
+            // Position pinned down: finish this item and start a fresh pair.
+            if (!get(orderByFightStore).itemB) {
+                await startOrderByFight();
+            }
         } catch (error) {
             console.error("Error moving item higher:", error);
         } finally {
@@ -109,20 +108,19 @@
 
             orderByFightStore.update(s => ({
                 ...s,
-                highestValue: store.itemB!.rank + 2
+                highestValue: store.itemB!.rank + 1
             }));
 
-            let backlogStoreInst = get(backlogStore);
-            
             if (store.itemB.rank > store.itemA.rank) {
                 await onMoveBacklogItem(store.itemA.rank, store.itemB.rank);
-                let newItemA = backlogStoreInst.backlog.backlogItems[store.itemB.rank - 1];
-                orderByFightStore.update(s => ({
-                    ...s,
-                    itemA: newItemA
-                }));
+                // Re-read itemA from the refreshed backlog (same artifact, new rank)
+                await updateItemA();
             }
             await getRandomItemB();
+            // Position pinned down: finish this item and start a fresh pair.
+            if (!get(orderByFightStore).itemB) {
+                await startOrderByFight();
+            }
         } catch (error) {
             console.error("Error moving item lower:", error);
         } finally {
@@ -170,23 +168,31 @@
         {:else}
             {#if backlogStoreInst.backlog.rankingType === BacklogRankingType.RANK}
                 <div class="space-y-4">
-                    <Card class="drawer-panel p-2 relative">
-                        <div class="absolute top-2 right-2">
-                            <Badge color="primary" class="font-semibold">#{store.itemA.rank}</Badge>
-                        </div>
-                        <Heading tag="h5" class="pb-2">Item to Order</Heading>
-                        <P class="font-medium">{store.itemA.artifact.title}</P>
-                    </Card>
+                    {#each [
+                        { side: "A", label: "Item to Order", item: store.itemA, poster: store.itemAPoster },
+                        { side: "B", label: "Compared to", item: store.itemB, poster: store.itemBPoster }
+                    ] as comparison (comparison.side)}
+                        <article class="drawer-panel rank-card" aria-label={comparison.label}>
+                            <div class="rank-card-header">
+                                <Badge color={comparison.side === "A" ? "primary" : "gray"} class="font-semibold">
+                                    {comparison.label}
+                                </Badge>
+                                <Badge color="primary" class="font-semibold">#{comparison.item.rank}</Badge>
+                            </div>
+                            <div class="rank-card-body">
+                                <div class="rank-poster">
+                                    {#if comparison.poster}
+                                        <img src={comparison.poster} alt="" />
+                                    {:else}
+                                        <ImageOutline class="h-6 w-6" />
+                                    {/if}
+                                </div>
+                                <h3 class="rank-title">{comparison.item.artifact.title}</h3>
+                            </div>
+                        </article>
+                    {/each}
                     
-                    <Card class="drawer-panel p-2 relative">
-                        <div class="absolute top-2 right-2">
-                            <Badge color="primary" class="font-semibold">#{store.itemB.rank}</Badge>
-                        </div>
-                        <Heading tag="h5" class="pb-2">Compared to</Heading>
-                        <P class="font-medium">{store.itemB.artifact.title}</P>
-                    </Card>
-                    
-                    <div class="flex gap-2 justify-center">
+                    <div class="flex flex-wrap gap-2 justify-center">
                         <Button 
                             color="primary"
                             onclick={orderByComparisonPickHigher}
@@ -283,6 +289,53 @@
 </TabItem>
 
 <style>
+    .rank-card {
+        padding: 12px;
+        border: 1px solid var(--drawer-border);
+    }
+
+    .rank-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .rank-card-body {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .rank-poster {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 80px;
+        overflow: hidden;
+        border-radius: 6px;
+        color: var(--app-muted);
+        background: var(--drawer-close);
+    }
+
+    .rank-poster img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .rank-title {
+        min-width: 0;
+        color: var(--app-text);
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.4;
+        overflow-wrap: anywhere;
+    }
+
     .elo-comparison {
         --fight-accent: var(--app-accent);
         --fight-border: #cbd5e1;
