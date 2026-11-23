@@ -97,7 +97,7 @@
 <Listgroup>
     <BacklogHeader canEdit={data.canEdit} />
     {#each $filteredBacklogItems as backlogItem (backlogItem.artifact.id)}
-        <ListgroupItem>
+        <ListgroupItem class="p-0">
             <BacklogItemComp
                 {backlogItem}
                 canEdit={data.canEdit}

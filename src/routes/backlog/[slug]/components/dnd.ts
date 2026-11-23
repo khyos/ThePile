@@ -9,7 +9,6 @@ type DropzoneOptions = DraggableOptions & {
 
 type DropzoneState = DropzoneOptions & {
     dropEffect: "move" | "none" | "copy" | "link";
-    dragOverClass: string;
 }
 
 export function draggable(node: HTMLElement, options: DraggableOptions) {
@@ -49,20 +48,22 @@ export function dropzone(node: HTMLElement, options: DropzoneOptions) {
     }
     const state: DropzoneState = {
         dropEffect: 'move',
-        dragOverClass: 'droppable',
         ...options
     }
 
-    const handleDragEnter = (e: DragEvent) => {
-        if (e.target instanceof HTMLElement) {
-            e.target.classList.add(state.dragOverClass);
-        }
+    // Shows an insertion line on the edge of the row where the dragged item
+    // would land: 'drop-before' (top) or 'drop-after' (bottom).
+    const clearIndicator = () => {
+        node.classList.remove('drop-before', 'drop-after');
     };
 
     const handleDragLeave = (e: DragEvent) => {
-        if (e.target instanceof HTMLElement) {
-            e.target.classList.remove(state.dragOverClass);
+        // Ignore moves between child elements; only clear when the pointer
+        // actually leaves the row.
+        if (e.relatedTarget instanceof Node && node.contains(e.relatedTarget)) {
+            return;
         }
+        clearIndicator();
     };
 
     const handleDragOver = (e: DragEvent) => {
@@ -70,46 +71,56 @@ export function dropzone(node: HTMLElement, options: DropzoneOptions) {
         if (e.dataTransfer) {
             e.dataTransfer.dropEffect = state.dropEffect;
         }
+        const rect = node.getBoundingClientRect();
+        const isBottomHalf = (e.clientY - rect.top) > rect.height / 2;
+        node.classList.toggle('drop-after', isBottomHalf);
+        node.classList.toggle('drop-before', !isBottomHalf);
     };
 
     const handleDrop = (e: DragEvent) => {
         e.preventDefault();
-        
-        // Get data from dragged item
-        if (!e.dataTransfer || !(e.currentTarget instanceof HTMLElement)) return;
-        const srcData = JSON.parse(e.dataTransfer.getData('text/plain'));
-        
-        // Remove visual indication
-        if (e.target instanceof HTMLElement) {
-            e.target.classList.remove(state.dragOverClass);
-        }
+        clearIndicator();
 
-        // Calculate target rank based on drop position
-        const targetHeight = e.currentTarget.getBoundingClientRect().height;
+        // Get data from dragged item
+        if (!e.dataTransfer) return;
+        const srcData = JSON.parse(e.dataTransfer.getData('text/plain'));
+
+        // Calculate target rank based on drop position.
+        // Use clientY relative to the dropzone row rather than e.offsetY, which
+        // is relative to the child element under the cursor and would give an
+        // inconsistent position.
+        const rect = node.getBoundingClientRect();
+        const offsetY = e.clientY - rect.top;
         let targetRank = state.rank;
-        
+
         // If dropped in bottom half, increment target rank
-        if (e.offsetY > targetHeight / 2) {
+        if (offsetY > rect.height / 2) {
             targetRank += 1;
         }
-        
+
         // Adjust for item removal position
         if (srcData.rank < targetRank) {
             targetRank -= 1;
         }
-        
+
         // Call the provided onDrop callback
         state.onDrop(srcData.rank, targetRank);
     };
 
-    node.addEventListener('dragenter', handleDragEnter);
     node.addEventListener('dragleave', handleDragLeave);
     node.addEventListener('dragover', handleDragOver);
     node.addEventListener('drop', handleDrop);
 
     return {
+        update(newOptions: DropzoneOptions) {
+            // Keep the rank (and callback) in sync after a reorder refreshes the
+            // list; without this the dropzone keeps its original mount-time rank
+            // and later drops are computed against a stale position.
+            state.rank = newOptions.rank;
+            state.onDrop = newOptions.onDrop;
+            state.canEdit = newOptions.canEdit;
+        },
         destroy() {
-            node.removeEventListener('dragenter', handleDragEnter);
             node.removeEventListener('dragleave', handleDragLeave);
             node.removeEventListener('dragover', handleDragOver);
             node.removeEventListener('drop', handleDrop);

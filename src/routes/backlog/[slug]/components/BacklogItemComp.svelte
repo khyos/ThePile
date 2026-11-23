@@ -25,9 +25,9 @@
     $: statusHighlight = (() => {
         if (!showWishlistAction) return '';
         const status = backlogItem.artifact.userInfo?.status;
-        if (!status) return 'border-l-4 border-red-500 pl-1';
-        if (status === UserArtifactStatus.ON_HOLD) return 'border-l-4 border-primary-400 pl-1';
-        if (status === UserArtifactStatus.ON_GOING) return 'border-l-4 border-green-500 pl-1';
+        if (!status) return 'border-l-4 border-red-500';
+        if (status === UserArtifactStatus.ON_HOLD) return 'border-l-4 border-primary-400';
+        if (status === UserArtifactStatus.ON_GOING) return 'border-l-4 border-green-500';
         return '';
     })();
     $: hasNoStatus = showWishlistAction && !backlogItem.artifact.userInfo?.status;
@@ -79,7 +79,7 @@
 </script>
 
 <div
-    class="w-full {statusHighlight}"
+    class="w-full py-2 px-4 {statusHighlight}"
     use:draggable={{ canEdit: canEdit && backlogStoreInst.backlog.rankingType === BacklogRankingType.RANK, rank: backlogItem.rank }}
     use:dropzone={{ canEdit: canEdit && backlogStoreInst.backlog.rankingType === BacklogRankingType.RANK, rank: backlogItem.rank, onDrop: onMoveBacklogItem }}
 >
