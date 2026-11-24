@@ -11,9 +11,10 @@ export const pageStore = writable<UserListPageStore>({
     openDrawer: false,
     selectedTab: 'filters'
 });
-export const toggleDrawer = () => {
+export const openDrawer = (selectedTab: UserListPageStore['selectedTab']) => {
     pageStore.update(s => ({
         ...s,
-        openDrawer: !s.openDrawer
+        openDrawer: true,
+        selectedTab
     }));
 }

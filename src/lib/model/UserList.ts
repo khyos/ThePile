@@ -3,8 +3,22 @@ import type { ISerializable, Serializable } from "./Serializable";
 import { artifactFromJSON } from "#lib/services/ArtifactService";
 
 export enum UserListOrder {
-    DATE_RELEASE = "dateRelease"
+    TITLE = "title",
+    SCORE = "score",
+    STATUS = "status",
+    DATE_RELEASE = "dateRelease",
+    DATE_START = "dateStart",
+    DATE_END = "dateEnd"
 }
+
+export const UserListOrderLabel = {
+    [UserListOrder.TITLE]: "Title",
+    [UserListOrder.SCORE]: "Score",
+    [UserListOrder.STATUS]: "Status",
+    [UserListOrder.DATE_RELEASE]: "Release Date",
+    [UserListOrder.DATE_START]: "Start Date",
+    [UserListOrder.DATE_END]: "End Date"
+} as const;
 
 export const SERIALIZE_TYPE = 'UserList';
 

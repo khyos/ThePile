@@ -1,7 +1,7 @@
 <script lang="ts">
     import { ArtifactType, type ArtifactAsyncInfo } from "#lib/model/Artifact";
     import type { Game } from "#lib/model/game/Game";
-    import { getMeanRatingColor, getRatingColor } from "#lib/model/Rating";
+    import { getMeanRatingColor, getRatingColor, getRatingTypeLabel } from "#lib/model/Rating";
     import { getAsyncInfo } from "#lib/services/ArtifactService";
     import { artifactItemStore } from "#lib/stores/ArtifactItemStore";
     import { TimeUtil } from "#lib/util/TimeUtil";
@@ -154,7 +154,7 @@
                     {#each artifact.ratings as rating (rating.type)}
                         {@const ratingColor = getRatingColor(artifact.type, rating.type, rating.rating)}
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-700 dark:text-gray-300">{rating.type}</span>
+                            <span class="text-gray-700 dark:text-gray-300">{getRatingTypeLabel(rating.type)}</span>
                             <Badge
                                 color={ratingColor}
                                 class={ratingColor === "gray" ? "neutral-rating" : ""}

@@ -56,3 +56,36 @@ describe('GET /api/link/getUrl — manga siblings still resolve', () => {
         expect(await resolvedUrl(response)).toBe('https://www.senscritique.com/bd/monster/12345');
     });
 });
+
+// --- Standards tests: LETTERBOXD URL construction ---
+
+describe('GET /api/link/getUrl — LETTERBOXD', () => {
+    it('embeds the slug directly into the Letterboxd film URL', async () => {
+        const response = await call({
+            artifactType: ArtifactType.MOVIE,
+            linkType: LinkType.LETTERBOXD,
+            linkUrl: 'the-dark-knight',
+        });
+        expect(await resolvedUrl(response)).toBe('https://letterboxd.com/film/the-dark-knight');
+    });
+
+    it('does not append a trailing slash or transform the slug', async () => {
+        const response = await call({
+            linkType: LinkType.LETTERBOXD,
+            linkUrl: 'my-neighbor-totoro',
+        });
+        const url = await resolvedUrl(response);
+        expect(url).toBe('https://letterboxd.com/film/my-neighbor-totoro');
+        // Confirm no double slash or extra suffix
+        expect(url.endsWith('/')).toBe(false);
+    });
+
+    it('does not fall through to the bare-id default for LETTERBOXD', async () => {
+        const slug = 'parasite-2019';
+        const response = await call({
+            linkType: LinkType.LETTERBOXD,
+            linkUrl: slug,
+        });
+        expect(await resolvedUrl(response)).not.toBe(slug);
+    });
+});

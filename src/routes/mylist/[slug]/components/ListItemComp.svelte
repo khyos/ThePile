@@ -13,6 +13,7 @@
     <TableBodyCell><a class='mr-1' href={`/${userListStoreInst.userList.artifactType}/${artifact.id}`}>{artifact.title}</a></TableBodyCell>
     <TableBodyCell>{artifact.userInfo?.score}</TableBodyCell>
     <TableBodyCell>{artifact.userInfo?.status}</TableBodyCell>
+    <TableBodyCell class="font-medium text-gray-900 dark:text-white">{artifact.releaseDate?.toLocaleDateString()}</TableBodyCell>
     {#if artifact.type === ArtifactType.MOVIE}
     <TableBodyCell>{artifact.userInfo?.startDate?.toLocaleDateString()}</TableBodyCell>
     {:else}

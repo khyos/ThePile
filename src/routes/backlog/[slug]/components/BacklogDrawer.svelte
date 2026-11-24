@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { tick } from "svelte";
     import { sineIn } from "svelte/easing";
+    import { focusSelectedDrawerTab } from "#lib/util/DrawerUtil";
     import { 
         Drawer,
         Tabs, 
@@ -30,21 +30,13 @@
     export let onFetchPrices: () => Promise<void>;
     export let onCreateTierList: (() => Promise<void>) | undefined = undefined;
 
-    const focusSelectedTab = async (event: CustomEvent & { currentTarget: HTMLDialogElement }) => {
-        const drawer = event.currentTarget;
-        await tick();
-        const focusedElement = drawer.ownerDocument.activeElement;
-        if (drawer.open && (focusedElement === drawer || focusedElement === drawer.querySelector('button[role="tab"]'))) {
-            drawer.querySelector<HTMLButtonElement>('button[role="tab"][aria-selected="true"]')?.focus();
-        }
-    };
 </script>
 
 <Drawer
     placement="right"
     transitionParams={transitionDrawerParams}
     bind:open={$pageStore.openDrawer}
-    onintrostart={focusSelectedTab}
+    onintrostart={focusSelectedDrawerTab}
     id="sidebar1"
     class="app-drawer w-full backdrop:bg-black/25"
 >

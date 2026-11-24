@@ -65,12 +65,12 @@ export class MetaCritic {
             const results: SearchResult[] = [];
             const cards: NodeListOf<HTMLAnchorElement> = dom.window.document.querySelectorAll('.c-search-results .search-item>a');
             for (const card of cards) {
-                const nameContainer = card.querySelector('div:nth-child(2)>p');
-                const name = nameContainer?.innerHTML.trim();
+                const name = card.querySelector('p.truncate')?.textContent?.trim();
                 if (!name) {
                     throw new Error('Name not found in Metacritic search result');
                 }
-                const date = card?.querySelector('div:nth-child(2)>div .c-search-product-meta__release-date>span')?.innerHTML.trim();
+                const dateSpan = Array.from(card.querySelectorAll('div.flex span')).find(s => !s.className && s.textContent?.match(/[A-Z][a-z]{2}\s+\d/));
+                const date = dateSpan?.textContent?.trim();
                 results.push({
                     id: MetaCritic.getLastPart(card.href),
                     name: name,

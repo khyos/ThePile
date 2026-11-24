@@ -73,13 +73,23 @@
             ]
         },
         {
-            id: "rt", 
+            id: "rt",
             name: "Rotten Tomatoes",
             url: "https://www.rottentomatoes.com/",
             helpText: [
                 "Search for the movie you want to add",
                 "Copy the text ID from the URL of the page",
                 "Example: https://www.rottentomatoes.com/m/<span style=\"color: red; font-weight: bold\">lost_in_translation</span>/"
+            ]
+        },
+        {
+            id: "lb",
+            name: "Letterboxd",
+            url: "https://letterboxd.com/",
+            helpText: [
+                "Go to the film page on Letterboxd",
+                "Copy the slug from the URL of the page",
+                "Example: https://letterboxd.com/film/<span style=\"color: red; font-weight: bold\">the-godfather</span>/"
             ]
         }
     ];
@@ -104,7 +114,10 @@
                 for (const result of results[key]) {
                     result.value = result.id;
                     if (result.date) {
-                        result.name = `${result.name} (${new Date(result.date).getFullYear()})`
+                        const year = /^\d{4}$/.test(result.date.trim())
+                            ? result.date.trim()
+                            : new Date(result.date).getFullYear();
+                        result.name = `${result.name} (${year})`
                     }
                 }
             }

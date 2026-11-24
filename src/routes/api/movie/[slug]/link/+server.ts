@@ -2,6 +2,7 @@ import { MetaCritic } from "#lib/metacritic/MetaCritic";
 import { LinkType } from "#lib/model/Link";
 import { RatingType } from "#lib/model/Rating";
 import { User, UserRights } from "#lib/model/User";
+import { Letterboxd } from "#lib/letterboxd/Letterboxd";
 import { RottenTomatoes } from "#lib/rottentomatoes/RottenTomatoes";
 import { SensCritique } from "#lib/senscritique/SensCritique";
 import { LinkDB } from "#lib/server/model/LinkDB";
@@ -65,6 +66,11 @@ const setLinkInfo = async (movieId: number, type: LinkType, url: string): Promis
         if (rtRatings.audience) {
             await RatingDB.updateRating(movieId, RatingType.ROTTEN_TOMATOES_AUDIENCE, rtRatings.audience);
         }
+    } else if (type === LinkType.LETTERBOXD) {
+        const lbRating = await Letterboxd.getRating(url);
+        if (lbRating) {
+            await RatingDB.updateRating(movieId, RatingType.LETTERBOXD, lbRating);
+        }
     } else if (type === LinkType.TMDB) {
         const [providersByArtifact, allServices] = await Promise.all([
             TMDB.getWatchProviders('movie', [{ artifactId: movieId, tmdbId: url }]),
@@ -117,8 +123,6 @@ export async function PUT({ params, request, locals }: RequestEvent) {
                     const scRating = await SensCritique.getMovieRating(url);
                     if (scRating) {
                         await RatingDB.updateRating(movieId, RatingType.SENSCRITIQUE, scRating);
-                    } else {
-                        await RatingDB.deleteRating(movieId, RatingType.SENSCRITIQUE);
                     }
                 } catch {
                     return error(500, "Failed to Update SENSCRITIQUE");
@@ -143,6 +147,15 @@ export async function PUT({ params, request, locals }: RequestEvent) {
                     }
                 } catch {
                     return error(500, "Failed to Update ROTTEN_TOMATOES");
+                }
+            } else if (type === LinkType.LETTERBOXD) {
+                try {
+                    const lbRating = await Letterboxd.getRating(url);
+                    if (lbRating) {
+                        await RatingDB.updateRating(movieId, RatingType.LETTERBOXD, lbRating);
+                    }
+                } catch {
+                    return error(500, "Failed to Update LETTERBOXD");
                 }
             }
         }

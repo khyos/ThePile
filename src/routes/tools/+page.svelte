@@ -6,6 +6,7 @@
         DownloadSolid,
         CalendarMonthSolid,
         ListOutline,
+        LinkOutline,
     } from "flowbite-svelte-icons";
     import type { PageData } from "./$types";
 
@@ -13,7 +14,7 @@
 </script>
 
 <svelte:head>
-    <title>Backlog - Tools</title>
+    <title>ThePile - Tools</title>
 </svelte:head>
 
 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -225,6 +226,32 @@
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                             Set dates for finished TV show episodes and seasons
                             by distributing them across two dates.
+                        </p>
+                    </div>
+                </div>
+            </Card>
+        </a>
+
+        <!-- Bulk Link -->
+        <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+        <a href="/tools/bulk-link" class="group no-underline">
+            <Card
+                class="h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+            >
+                <div class="flex items-center gap-4 pl-2">
+                    <div
+                        class="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-400 to-green-500 shadow-md shrink-0 group-hover:scale-110 transition-transform duration-300"
+                    >
+                        <LinkOutline class="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                        <h2
+                            class="text-lg font-semibold text-gray-900 dark:text-white mb-1"
+                        >
+                            Bulk Link
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            Find entries missing a specific external link and add them in bulk.
                         </p>
                     </div>
                 </div>
