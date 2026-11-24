@@ -59,13 +59,17 @@ export class RottenTomatoes {
         let dom;
         try {
             dom = new JSDOM(response.body);
-            const links: NodeListOf<HTMLAnchorElement> = dom.window.document.querySelectorAll(`search-page-result[type=${type}] search-page-media-row>a[data-qa=info-name]`);
+            const rows: NodeListOf<Element> = dom.window.document.querySelectorAll(`search-page-result[type=${type}] search-page-media-row`);
             const results: SearchResult[] = [];
-            for (const link of links) {
+            for (const row of rows) {
+                const link = row.querySelector<HTMLAnchorElement>('a[data-qa=info-name]');
+                if (!link) continue;
+                const year = row.getAttribute('release-year') ?? undefined;
                 results.push({
                     id: RottenTomatoes.getLastPart(link.href),
                     name: link.innerHTML.trim(),
-                    link: link.href
+                    link: link.href,
+                    date: year
                 })
             }
             return results;

@@ -136,3 +136,40 @@ describe('MANGABAKA link wiring', () => {
         expect(getLinkTypesByArtifactType(ArtifactType.TVSHOW)).not.toContain(LinkType.MANGABAKA);
     });
 });
+
+/**
+ * Contract tests for Letterboxd link type wiring.
+ *
+ * Contract:
+ *   - getLinkTypeLabel(LinkType.LETTERBOXD) → 'Letterboxd'
+ *   - getMovieLinkTypes() contains LinkType.LETTERBOXD
+ *   - LETTERBOXD is not offered for game, anime, manga, or TV show artifact types
+ */
+describe('LETTERBOXD link wiring', () => {
+    test('enum member has the stringified value "LETTERBOXD"', () => {
+        expect(LinkType.LETTERBOXD).toBe('LETTERBOXD');
+    });
+
+    test('getLinkTypeLabel returns "Letterboxd"', () => {
+        expect(getLinkTypeLabel(LinkType.LETTERBOXD)).toBe('Letterboxd');
+    });
+
+    test('getMovieLinkTypes includes LETTERBOXD', () => {
+        expect(getMovieLinkTypes()).toContain(LinkType.LETTERBOXD);
+    });
+
+    test('getLinkTypesByArtifactType(MOVIE) includes LETTERBOXD', () => {
+        expect(getLinkTypesByArtifactType(ArtifactType.MOVIE)).toContain(LinkType.LETTERBOXD);
+    });
+
+    test('LETTERBOXD is not offered for game, anime, manga, or TV show artifact types', () => {
+        expect(getGameLinkTypes()).not.toContain(LinkType.LETTERBOXD);
+        expect(getAnimeLinkTypes()).not.toContain(LinkType.LETTERBOXD);
+        expect(getMangaLinkTypes()).not.toContain(LinkType.LETTERBOXD);
+        expect(getTvshowLinkTypes()).not.toContain(LinkType.LETTERBOXD);
+        expect(getLinkTypesByArtifactType(ArtifactType.GAME)).not.toContain(LinkType.LETTERBOXD);
+        expect(getLinkTypesByArtifactType(ArtifactType.ANIME)).not.toContain(LinkType.LETTERBOXD);
+        expect(getLinkTypesByArtifactType(ArtifactType.MANGA)).not.toContain(LinkType.LETTERBOXD);
+        expect(getLinkTypesByArtifactType(ArtifactType.TVSHOW)).not.toContain(LinkType.LETTERBOXD);
+    });
+});

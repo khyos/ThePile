@@ -33,6 +33,9 @@ const getURLFromId = async function(artifactType: ArtifactType | null, type: Lin
             const finalUrl = await ITAD.getSlugFromId(url);
             return `https://isthereanydeal.com/game/${finalUrl}`;
         }
+        case LinkType.LETTERBOXD:
+            if (!/^[a-z0-9-]+$/.test(url)) return url;
+            return `https://letterboxd.com/film/${url}`;
         case LinkType.MAL:
             if (artifactType === ArtifactType.MANGA) {
                 return `https://myanimelist.net/manga/${url}`;
