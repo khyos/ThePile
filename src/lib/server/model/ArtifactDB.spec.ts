@@ -1,5 +1,5 @@
 import type sqlite3 from 'sqlite3';
-import { getDb, runDbInsert, runDbQueries } from '../database';
+import { getDb, getDbRows, runDbInsert, runDbQueries, runDbQuery } from '../database';
 import { describe, expect, test, beforeAll, afterAll, beforeEach } from 'vitest';
 import { ArtifactType, Artifact, type IArtifactDB } from '#lib/model/Artifact';
 import { UserArtifactStatus } from '#lib/model/UserArtifact';
@@ -86,6 +86,32 @@ describe('ArtifactDB', () => {
         } catch (error) {
             console.error('Error cleaning up test data:', error);
         }
+    });
+
+    test('indexes anime child counts on an existing table without changing results', async () => {
+        await runDbQuery('DROP INDEX IF EXISTS idx_artifact_parent');
+        const parentId = await runDbInsert("INSERT INTO artifact (title, type) VALUES ('Anime', 'anime')");
+        const emptyParentId = await runDbInsert("INSERT INTO artifact (title, type) VALUES ('Empty anime', 'anime')");
+        await runDbQueries([
+            { query: "INSERT INTO artifact (title, type, parent_artifact_id) VALUES ('Episode 1', 'anime_episode', ?)", params: [parentId] },
+            { query: "INSERT INTO artifact (title, type, parent_artifact_id) VALUES ('Episode 2', 'anime_episode', ?)", params: [parentId] }
+        ]);
+        const query = `SELECT artifact.id,
+            (SELECT COUNT(*) FROM artifact child WHERE child.parent_artifact_id = artifact.id) AS episodeCount
+            FROM artifact WHERE artifact.id IN (?, ?) ORDER BY artifact.id`;
+        const params = [parentId, emptyParentId];
+        const before = await getDbRows<{ id: number; episodeCount: number }>(query, params);
+        expect(before).toEqual([
+            { id: parentId, episodeCount: 2 },
+            { id: emptyParentId, episodeCount: 0 }
+        ]);
+
+        await ArtifactDB.createArtifactTable();
+        await ArtifactDB.createArtifactTable();
+
+        expect(await getDbRows(query, params)).toEqual(before);
+        const plan = await getDbRows<{ detail: string }>(`EXPLAIN QUERY PLAN ${query}`, params);
+        expect(plan.some(row => /SEARCH child USING COVERING INDEX idx_artifact_parent/.test(row.detail))).toBe(true);
     });
 
     describe('Basic Getters', () => {
@@ -501,6 +527,47 @@ describe('ArtifactDB', () => {
             expect(movie2!.userInfo!.score).toBe(7);
             expect(movie2!.userInfo!.startDate?.toISOString().split('T')[0]).toBe('2023-02-01');
             expect(movie2!.userInfo!.endDate).toBeNull();
+        });
+
+        test.each([
+            ArtifactType.GAME,
+            ArtifactType.MOVIE,
+            ArtifactType.TVSHOW,
+            ArtifactType.ANIME,
+            ArtifactType.MANGA
+        ])('getUserList should exclude status None for %s while keeping every tracked status', async (artifactType) => {
+            const noneId = await ArtifactDB.createArtifact('Untracked artifact', artifactType);
+            await ArtifactDB.setUserScore(1, noneId, 80);
+            await ArtifactDB.setUserDate(1, noneId, new Date('2023-01-01').getTime(), 'both');
+
+            const trackedIds: number[] = [];
+            for (const status of Object.values(UserArtifactStatus)) {
+                const artifactId = await ArtifactDB.createArtifact(status, artifactType);
+                await ArtifactDB.setUserStatus(1, [artifactId], status);
+                trackedIds.push(artifactId);
+            }
+
+            const userList = await ArtifactDB.getUserList(1, artifactType);
+
+            expect(userList.artifacts.map(artifact => artifact.id).sort((a, b) => a - b)).toEqual(trackedIds);
+            expect(await ArtifactDB.getUserInfo(1, noneId)).toMatchObject({
+                status: null,
+                score: 80,
+                startDate: new Date('2023-01-01'),
+                endDate: new Date('2023-01-01')
+            });
+        });
+
+        test('getUserList should hide an artifact after its status is cleared without deleting its score', async () => {
+            const artifactId = await ArtifactDB.createArtifact('Tracked movie', ArtifactType.MOVIE);
+            await ArtifactDB.setUserStatus(1, [artifactId], UserArtifactStatus.FINISHED);
+            await ArtifactDB.setUserScore(1, artifactId, 75);
+            expect((await ArtifactDB.getUserList(1, ArtifactType.MOVIE)).artifacts).toHaveLength(1);
+
+            await ArtifactDB.setUserStatus(1, [artifactId], null);
+
+            expect((await ArtifactDB.getUserList(1, ArtifactType.MOVIE)).artifacts).toHaveLength(0);
+            expect(await ArtifactDB.getUserInfo(1, artifactId)).toMatchObject({ status: null, score: 75 });
         });
 
         test('getUserOngoingList should return empty UserList for user with no ongoing artifacts', async () => {

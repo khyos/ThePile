@@ -2,6 +2,7 @@
     import { FilterOutline, PlusOutline } from "flowbite-svelte-icons";
     import { onMount } from "svelte";
     import { TimeUtil } from "#lib/util/TimeUtil";
+    import DrawerShortcut from "#lib/ui/DrawerShortcut.svelte";
     import { backlogStore } from "../stores/BacklogStore";
     import { openDrawer, pageStore } from "../stores/PageStore";
 
@@ -35,43 +36,34 @@
         </div>
     </div>
     <div class="header-actions">
-        <button
-            type="button"
-            class="header-action"
-            aria-label="Filters"
-            title="Filters"
-            aria-controls="sidebar1"
-            aria-expanded={$pageStore.openDrawer && $pageStore.selectedTab === "filters"}
+        <DrawerShortcut
+            label="Filters"
+            drawerId="sidebar1"
+            expanded={$pageStore.openDrawer && $pageStore.selectedTab === "filters"}
             onclick={() => openDrawer("filters")}
         >
-            <span aria-hidden="true"><FilterOutline class="h-4 w-4" /></span>
-        </button>
+            <FilterOutline class="h-4 w-4" />
+        </DrawerShortcut>
         {#if canEdit}
-            <button
-                type="button"
-                class="header-action"
-                aria-label="Add to backlog"
-                title="Add to backlog"
-                aria-controls="sidebar1"
-                aria-expanded={$pageStore.openDrawer && $pageStore.selectedTab === "add"}
+            <DrawerShortcut
+                label="Add to backlog"
+                drawerId="sidebar1"
+                expanded={$pageStore.openDrawer && $pageStore.selectedTab === "add"}
                 onclick={() => openDrawer("add")}
             >
-                <span aria-hidden="true"><PlusOutline class="h-4 w-4" /></span>
-            </button>
-            <button
-                type="button"
-                class="header-action"
-                aria-label="Order by fight"
-                title="Order by fight"
-                aria-controls="sidebar1"
-                aria-expanded={$pageStore.openDrawer && $pageStore.selectedTab === "order"}
+                <PlusOutline class="h-4 w-4" />
+            </DrawerShortcut>
+            <DrawerShortcut
+                label="Order by fight"
+                drawerId="sidebar1"
+                expanded={$pageStore.openDrawer && $pageStore.selectedTab === "order"}
                 onclick={() => openDrawer("order")}
             >
                 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 3h4l10 10-4 4L3 7V3Zm9 15 6-6m-3 3 5 5m-2 2 4-4" />
                     <path d="M3 3h4l10 10-4 4L3 7V3Zm9 15 6-6m-3 3 5 5m-2 2 4-4" transform="translate(24 0) scale(-1 1)" />
                 </svg>
-            </button>
+            </DrawerShortcut>
         {/if}
     </div>
 </li>
@@ -130,45 +122,9 @@
         margin-left: auto;
     }
 
-    .header-action {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border: 1px solid #cbd5e1;
-        border-radius: 7px;
-        color: var(--app-accent);
-        background: #f1f5f9;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
-    }
-
-    .header-action:hover {
-        color: var(--app-accent);
-        background: #e2e8f0;
-    }
-
-    .header-action:focus-visible {
-        outline: 2px solid var(--app-accent-focus);
-        outline-offset: 2px;
-    }
-
     :global(.dark) .backlog-header {
         border-color: #303d4f;
         background: linear-gradient(110deg, #182431, #121b29);
-    }
-
-    :global(.dark) .header-action {
-        border-color: #364254;
-        color: var(--app-accent);
-        background: #202e3e;
-    }
-
-    :global(.dark) .header-action:hover {
-        color: var(--app-accent);
-        background: #2e4055;
     }
 
     @media (max-width: 639px) {

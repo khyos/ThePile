@@ -127,7 +127,8 @@ export class ArtifactDB {
         const query = `SELECT *
                        FROM artifact
                        INNER JOIN user_artifact ON artifact.id = user_artifact.artifactId
-                       WHERE artifact.type = ? AND user_artifact.userId = ?`;
+                       WHERE artifact.type = ? AND user_artifact.userId = ?
+                         AND user_artifact.status IS NOT NULL`;
         const params = [artifactType, userId];
         const rows = await getDbRows<IUserListItemDB>(query, params);
         
@@ -547,6 +548,8 @@ export class ArtifactDB {
             status TEXT DEFAULT NULL,
             FOREIGN KEY (parent_artifact_id) REFERENCES artifact(id)
         )`);
+        await runDbQuery(`CREATE INDEX IF NOT EXISTS idx_artifact_parent
+            ON artifact (parent_artifact_id)`);
     }
 
     static async createUserArtifactTable() {

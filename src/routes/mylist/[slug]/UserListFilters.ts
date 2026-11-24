@@ -1,9 +1,11 @@
 import { Artifact, ArtifactType } from "#lib/model/Artifact";
 import { UserListOrder } from "#lib/model/UserList";
+import { UserArtifactStatus } from "#lib/model/UserArtifact";
 import type { Game } from "#lib/model/game/Game";
 
 const currentYear = new Date().getFullYear();
 
+const CONSUMPTION_DATE_MIN = 1970;
 const GAME_RELEASE_DATE_MIN = 1970;
 const GAME_RELEASE_DATE_MAX = currentYear;
 const MOVIE_RELEASE_DATE_MIN = 1895;
@@ -34,7 +36,26 @@ export type UserListFilters = {
     rating: {
         min: number
     }
+    score: {
+        min: number
+        max: number
+    }
+    status: {
+        included: UserArtifactStatus[]
+    }
     releaseDate: {
+        min: number
+        max: number
+        absoluteMin: number
+        absoluteMax: number
+    }
+    startDate: {
+        min: number
+        max: number
+        absoluteMin: number
+        absoluteMax: number
+    }
+    endDate: {
         min: number
         max: number
         absoluteMin: number
@@ -60,11 +81,30 @@ export function createUserListFilters(artifactType: ArtifactType): UserListFilte
         rating: {
             min: 0
         },
+        score: {
+            min: 0,
+            max: 100
+        },
+        status: {
+            included: []
+        },
         releaseDate: {
             min: 0,
             max: 0,
             absoluteMin: 0,
             absoluteMax: 0
+        },
+        startDate: {
+            min: CONSUMPTION_DATE_MIN,
+            max: currentYear,
+            absoluteMin: CONSUMPTION_DATE_MIN,
+            absoluteMax: currentYear
+        },
+        endDate: {
+            min: CONSUMPTION_DATE_MIN,
+            max: currentYear,
+            absoluteMin: CONSUMPTION_DATE_MIN,
+            absoluteMax: currentYear
         }
     }
     if (artifactType === ArtifactType.GAME) {
@@ -98,17 +138,57 @@ export function createUserListFilters(artifactType: ArtifactType): UserListFilte
     return filters;
 }
 
-export function filterUserListItems(items: Artifact[], artifactType: ArtifactType, filters: UserListFilters) {
-    if (filters.orderBy.type === UserListOrder.DATE_RELEASE) {
-        items.sort((a, b) => {
-            if (!a.releaseDate) {
-                return -1;
-            } else if (!b.releaseDate) {
-                return 1;
-            }
-            return new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime();
-        });
+const STATUS_ORDER: Record<UserArtifactStatus, number> = {
+    [UserArtifactStatus.WISHLIST]: 0,
+    [UserArtifactStatus.ON_GOING]: 1,
+    [UserArtifactStatus.ON_HOLD]: 2,
+    [UserArtifactStatus.DROPPED]: 3,
+    [UserArtifactStatus.FINISHED]: 4
+};
+
+function getSortKey(artifact: Artifact, type: UserListOrder): number | string | null {
+    switch (type) {
+        case UserListOrder.TITLE:
+            return artifact.title;
+        case UserListOrder.SCORE:
+            return artifact.userInfo?.score ?? null;
+        case UserListOrder.STATUS:
+            return artifact.userInfo?.status != null ? STATUS_ORDER[artifact.userInfo.status] : null;
+        case UserListOrder.DATE_RELEASE:
+            return artifact.releaseDate ? artifact.releaseDate.getTime() : null;
+        case UserListOrder.DATE_START:
+            return artifact.userInfo?.startDate ? artifact.userInfo.startDate.getTime() : null;
+        case UserListOrder.DATE_END:
+            return artifact.userInfo?.endDate ? artifact.userInfo.endDate.getTime() : null;
     }
+}
+
+export function filterUserListItems(items: Artifact[], artifactType: ArtifactType, filters: UserListFilters) {
+    items = [...items];
+    const { type, direction } = filters.orderBy;
+    items.sort((a, b) => {
+        const keyA = getSortKey(a, type);
+        const keyB = getSortKey(b, type);
+        if (keyA === null && keyB === null) {
+            return a.id - b.id;
+        }
+        if (keyA === null) {
+            return 1;
+        }
+        if (keyB === null) {
+            return -1;
+        }
+        let comparison: number;
+        if (typeof keyA === 'string' && typeof keyB === 'string') {
+            comparison = keyA.localeCompare(keyB);
+        } else {
+            comparison = (keyA as number) - (keyB as number);
+        }
+        if (comparison === 0) {
+            return a.id - b.id;
+        }
+        return direction === 'asc' ? comparison : -comparison;
+    });
     if (filters.genres.included.length > 0) {
         items = items.filter((item) => {
             return item.genres.some((genre) => {
@@ -160,6 +240,40 @@ export function filterUserListItems(items: Artifact[], artifactType: ArtifactTyp
         items = items.filter((item) => {
             const meanRating = item.meanRating;
             return meanRating === null || meanRating >= filters.rating.min;
+        });
+    }
+    if (filters.score.min > 0 || filters.score.max < 100) {
+        items = items.filter((item) => {
+            const score = item.userInfo?.score;
+            return score != null && score >= filters.score.min && score <= filters.score.max;
+        });
+    }
+    if (filters.status.included.length > 0) {
+        items = items.filter((item) => {
+            const status = item.userInfo?.status;
+            return status != null && filters.status.included.includes(status);
+        });
+    }
+    if (filters.startDate.min > filters.startDate.absoluteMin
+        || filters.startDate.max < filters.startDate.absoluteMax) {
+        items = items.filter((item) => {
+            const startDate = item.userInfo?.startDate;
+            if (!startDate) {
+                return false;
+            }
+            const year = startDate.getFullYear();
+            return year >= filters.startDate.min && year <= filters.startDate.max;
+        });
+    }
+    if (filters.endDate.min > filters.endDate.absoluteMin
+        || filters.endDate.max < filters.endDate.absoluteMax) {
+        items = items.filter((item) => {
+            const endDate = item.userInfo?.endDate;
+            if (!endDate) {
+                return false;
+            }
+            const year = endDate.getFullYear();
+            return year >= filters.endDate.min && year <= filters.endDate.max;
         });
     }
     return items;

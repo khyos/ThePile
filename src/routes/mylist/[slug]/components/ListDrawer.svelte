@@ -1,5 +1,6 @@
 <script lang="ts">
     import { sineIn } from "svelte/easing";
+    import { focusSelectedDrawerTab } from "#lib/util/DrawerUtil";
     import { 
         Drawer,
         Tabs 
@@ -24,19 +25,18 @@
     placement="right"
     transitionParams={transitionDrawerParams}
     bind:open={$pageStore.openDrawer}
+    onintrostart={focusSelectedDrawerTab}
     id="sidebar1"
     class="app-drawer w-full backdrop:bg-black/25"
 >
     <Tabs
+        bind:selected={$pageStore.selectedTab}
         tabStyle="full"
     >
         <ListDrawerTabFilters
-            bind:selectedTab={$pageStore.selectedTab}
             {genres}
             {platforms}
         />
-        <ListDrawerTabAdd
-            bind:selectedTab={$pageStore.selectedTab}
-        />
+        <ListDrawerTabAdd />
     </Tabs>
 </Drawer>

@@ -1,52 +1,90 @@
 <script lang="ts">
     import {
-        Button,
         Table,
         TableBody,
         TableHead,
-        TableHeadCell,
     } from "flowbite-svelte";
+    import { FilterOutline, PlusOutline } from "flowbite-svelte-icons";
+    import DrawerShortcut from "#lib/ui/DrawerShortcut.svelte";
     import type { PageData } from "./$types";
     import ListDrawer from "./components/ListDrawer.svelte";
     import { TimeUtil } from "#lib/util/TimeUtil";
     import ListItemComp from "./components/ListItemComp.svelte";
-    import { toggleDrawer } from "./stores/PageStore";
-    import { filteredArtifacts, initializeStore } from "./stores/UserListStore";
+    import SortableHeadCell from "./components/SortableHeadCell.svelte";
+    import { openDrawer, pageStore } from "./stores/PageStore";
+    import { filteredArtifacts, initializeStore, userListStore } from "./stores/UserListStore";
     import { Genre } from "#lib/model/Genre";
     import { Platform } from "#lib/model/game/Platform";
     import { ArtifactType } from "#lib/model/Artifact";
+    import { UserListOrder } from "#lib/model/UserList";
 
     export let data: PageData;
 
-    initializeStore(data.list);
+    $: initializeStore(data.list);
 
-    let genres = data.genres.map(genre => Genre.fromJSON(genre));
-    let platforms = data.platforms.map(platform => Platform.fromJSON(platform));
+    $: genres = data.genres.map(genre => Genre.fromJSON(genre));
+    $: platforms = data.platforms.map(platform => Platform.fromJSON(platform));
 
-    let totalTime = data.list.artifacts.reduce((acc, artifact) => {
+    $: totalTime = data.list.artifacts.reduce((acc, artifact) => {
         return acc + artifact.duration;
     }, 0);
+
+    $: orderBy = $userListStore.userListFilters.orderBy;
+
+    function setSort(type: UserListOrder) {
+        userListStore.update((store) => {
+            const current = store.userListFilters.orderBy;
+            const direction = current.type === type
+                ? (current.direction === 'asc' ? 'desc' : 'asc')
+                : 'asc';
+            return {
+                ...store,
+                userListFilters: {
+                    ...store.userListFilters,
+                    orderBy: { type, direction }
+                }
+            };
+        });
+    }
 </script>
 
-<div style="display:flex">
+<div class="flex items-center gap-4">
     <h3
         class="p-1 text-xl font-medium text-gray-900 dark:text-white"
         style="flex-grow: 1; padding-left: 1rem"
     >
         {data.list.artifactType} ({TimeUtil.formatDuration(totalTime)})
     </h3>
-    <Button onclick={toggleDrawer}>Filters / Add</Button>
+    <div class="flex shrink-0 gap-1.5">
+        <DrawerShortcut
+            label="Filters"
+            drawerId="sidebar1"
+            expanded={$pageStore.openDrawer && $pageStore.selectedTab === "filters"}
+            onclick={() => openDrawer("filters")}
+        >
+            <FilterOutline class="h-4 w-4" />
+        </DrawerShortcut>
+        <DrawerShortcut
+            label="Add to list"
+            drawerId="sidebar1"
+            expanded={$pageStore.openDrawer && $pageStore.selectedTab === "add"}
+            onclick={() => openDrawer("add")}
+        >
+            <PlusOutline class="h-4 w-4" />
+        </DrawerShortcut>
+    </div>
 </div>
 <Table>
     <TableHead>
-        <TableHeadCell>Title</TableHeadCell>
-        <TableHeadCell>Score</TableHeadCell>
-        <TableHeadCell>Status</TableHeadCell>
+        <SortableHeadCell type={UserListOrder.TITLE} activeType={orderBy.type} direction={orderBy.direction} onSort={setSort} />
+        <SortableHeadCell type={UserListOrder.SCORE} activeType={orderBy.type} direction={orderBy.direction} onSort={setSort} />
+        <SortableHeadCell type={UserListOrder.STATUS} activeType={orderBy.type} direction={orderBy.direction} onSort={setSort} />
+        <SortableHeadCell type={UserListOrder.DATE_RELEASE} activeType={orderBy.type} direction={orderBy.direction} onSort={setSort} />
         {#if data.list.artifactType === ArtifactType.MOVIE}
-        <TableHeadCell>Date</TableHeadCell>
+        <SortableHeadCell type={UserListOrder.DATE_START} label="Date" activeType={orderBy.type} direction={orderBy.direction} onSort={setSort} />
         {:else}
-        <TableHeadCell>Start Date</TableHeadCell>
-        <TableHeadCell>End Date</TableHeadCell>
+        <SortableHeadCell type={UserListOrder.DATE_START} activeType={orderBy.type} direction={orderBy.direction} onSort={setSort} />
+        <SortableHeadCell type={UserListOrder.DATE_END} activeType={orderBy.type} direction={orderBy.direction} onSort={setSort} />
         {/if}
     </TableHead>
     <TableBody>
