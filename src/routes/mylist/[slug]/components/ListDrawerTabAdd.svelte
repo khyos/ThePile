@@ -16,7 +16,6 @@
     import { addUserListItem } from "#lib/services/UserListService";
     import { userListStore, refreshUserList } from "../stores/UserListStore";
     
-    export let selectedTab: string = "filters";
     let searchArtifactTerm: string = "";
     let searchedArtifacts: Artifact[] = [];
 
@@ -41,7 +40,7 @@
 
 </script>
 
-<TabItem open={selectedTab == 'add'} title="Add" class="w-full">
+<TabItem key="add" title="Add" class="w-full">
     <Label class="block mb-2">Add to List</Label>
     <Input
         type="text"

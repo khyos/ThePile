@@ -48,7 +48,7 @@
 </script>
 
 {#if artifactDepth === 2 && artifact.children.length > 0}
-    <div class="children-container">
+    <div class="children-container text-gray-900 dark:text-gray-100">
         <div class="flex items-center mb-2">
             <ChevronDoubleRightOutline class="w-4 h-4 mr-2 text-purple-500" />
             <P weight="medium" class="text-lg"
@@ -57,18 +57,18 @@
         </div>
 
         {#each artifact.children as firstLevelChild (firstLevelChild.id)}
-            <div class="child-item mb-4 border rounded-lg border-gray-300">
+            <div class="child-item mb-4 border rounded-lg border-gray-300 dark:border-gray-700">
                 <div class="flex items-center">
                     <button
-                        class="flex-1 flex items-center justify-between p-3 hover:bg-gray-100 transition-colors"
+                        class="flex-1 flex items-center justify-between p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                         onclick={() => toggleChild(firstLevelChild.id)}
                     >
                         <span class="font-medium">{firstLevelChild.title}</span>
                         {#if expandedChildren.includes(firstLevelChild.id)}
-                            <ChevronDownOutline class="w-5 h-5 text-gray-600" />
+                            <ChevronDownOutline class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                         {:else}
                             <ChevronRightOutline
-                                class="w-5 h-5 text-gray-600"
+                                class="w-5 h-5 text-gray-600 dark:text-gray-400"
                             />
                         {/if}
                     </button>
@@ -87,10 +87,10 @@
                 </div>
 
                 {#if expandedChildren.includes(firstLevelChild.id)}
-                    <div class="secondLevelChildren-list p-3 bg-gray-50">
+                    <div class="secondLevelChildren-list p-3 bg-gray-50 dark:bg-gray-900">
                         {#if firstLevelChild.children.length > 0}
                             <table class="w-full text-sm">
-                                <thead class="bg-gray-50 border-b">
+                                <thead class="bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700">
                                     <tr>
                                         <th class="p-2 text-left">Index</th>
                                         <th class="p-2 text-left"
@@ -119,7 +119,7 @@
                                 <tbody>
                                     {#each firstLevelChild.children as secondLevelChild, index (secondLevelChild.id)}
                                         <tr
-                                            class="border-b last:border-b-0 border-gray-300 hover:bg-gray-100"
+                                            class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800"
                                         >
                                             <td class="p-2">{index + 1}</td>
                                             <td class="p-2"
@@ -132,7 +132,7 @@
                                                     )}
                                                 {:else}
                                                     <span
-                                                        class="text-gray-500 italic"
+                                                        class="text-gray-500 dark:text-gray-400 italic"
                                                         >N/A</span
                                                     >
                                                 {/if}
@@ -183,7 +183,7 @@
                                 </tbody>
                             </table>
                         {:else}
-                            <p class="text-gray-500 italic">
+                            <p class="text-gray-500 dark:text-gray-400 italic">
                                 No {ArtifactTypeUtil.getChildName(
                                     artifact.type,
                                     1,
@@ -196,7 +196,7 @@
         {/each}
     </div>
 {:else if artifactDepth === 1 && artifact.children.length > 0}
-    <div class="children-container">
+    <div class="children-container text-gray-900 dark:text-gray-100">
         {#if ArtifactTypeUtil.hasParallelChildren(artifact.type)}
             <!-- Manga: two independent flat sections — Volumes and Chapters -->
             {#each ArtifactTypeUtil.getParallelChildSections(artifact.type) as section (section.type)}
@@ -207,9 +207,9 @@
                             <ChevronDoubleRightOutline class="w-4 h-4 mr-2 text-purple-500" />
                             <P weight="medium" class="text-lg">{section.label}</P>
                         </div>
-                        <div class="secondLevelChildren-list p-3 bg-gray-50">
+                        <div class="secondLevelChildren-list p-3 bg-gray-50 dark:bg-gray-900">
                             <table class="w-full text-sm">
-                                <thead class="bg-gray-50 border-b">
+                                <thead class="bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700">
                                     <tr>
                                         <th class="p-2 text-left">Index</th>
                                         <th class="p-2 text-left">Title</th>
@@ -221,14 +221,14 @@
                                 </thead>
                                 <tbody>
                                     {#each sectionChildren as child, index (child.id)}
-                                        <tr class="border-b last:border-b-0 border-gray-300 hover:bg-gray-100">
+                                        <tr class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
                                             <td class="p-2">{index + 1}</td>
                                             <td class="p-2">{child.title}</td>
                                             <td class="p-2">
                                                 {#if child.duration}
                                                     {TimeUtil.formatDuration(child.duration)}
                                                 {:else}
-                                                    <span class="text-gray-500 italic">N/A</span>
+                                                    <span class="text-gray-500 dark:text-gray-400 italic">N/A</span>
                                                 {/if}
                                             </td>
                                             {#if userConnected}
@@ -261,9 +261,9 @@
                 <ChevronDoubleRightOutline class="w-4 h-4 mr-2 text-purple-500" />
                 <P weight="medium" class="text-lg">{ArtifactTypeUtil.getChildName(artifact.type, 0)}</P>
             </div>
-            <div class="secondLevelChildren-list p-3 bg-gray-50">
+            <div class="secondLevelChildren-list p-3 bg-gray-50 dark:bg-gray-900">
                 <table class="w-full text-sm">
-                    <thead class="bg-gray-50 border-b">
+                    <thead class="bg-gray-50 dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700">
                         <tr>
                             <th class="p-2 text-left">Index</th>
                             <th class="p-2 text-left">{ArtifactTypeUtil.getChildName(artifact.type, 0)}</th>
@@ -280,14 +280,14 @@
                     </thead>
                     <tbody>
                         {#each artifact.children as secondLevelChild, index (secondLevelChild.id)}
-                            <tr class="border-b last:border-b-0 border-gray-300 hover:bg-gray-100">
+                            <tr class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
                                 <td class="p-2">{index + 1}</td>
                                 <td class="p-2">{secondLevelChild.title}</td>
                                 <td class="p-2">
                                     {#if secondLevelChild.duration}
                                         {TimeUtil.formatDuration(secondLevelChild.duration)}
                                     {:else}
-                                        <span class="text-gray-500 italic">N/A</span>
+                                        <span class="text-gray-500 dark:text-gray-400 italic">N/A</span>
                                     {/if}
                                 </td>
                                 {#if userConnected}

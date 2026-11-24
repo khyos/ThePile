@@ -151,6 +151,7 @@ export function createBacklogFilters(artifactType: ArtifactType, rankingType: Ba
 }
 
 export function filterBacklogItems(items: BacklogItem[], artifactType: ArtifactType, filters: BacklogFilters) {
+    items = [...items];
     if (filters.orderBy.type === BacklogOrder.DATE_ADDED) {
         items.sort((a, b) => {
             return b.dateAdded - a.dateAdded;

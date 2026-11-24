@@ -160,22 +160,22 @@
 </script>
 
 <Modal bind:open title="Detailed View" size="xl" class="overflow-y-auto">
-    <div class="max-h-[70vh] overflow-y-auto">
+    <div class="max-h-[70vh] overflow-y-auto text-gray-900 dark:text-gray-100">
         {#if artifactDepth === 2}
             <!-- TVSHOW: seasons as accordion rows + episodes in sub-table -->
             {#each artifact.children as season, seasonIndex (season.id)}
-                <div class="mb-4 border rounded-lg border-gray-300">
+                <div class="mb-4 border rounded-lg border-gray-300 dark:border-gray-700">
                     <!-- Season toggle header -->
                     <div class="flex items-center">
                         <button
-                            class="flex-1 flex items-center justify-between p-3 hover:bg-gray-100 transition-colors"
+                            class="flex-1 flex items-center justify-between p-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             onclick={() => toggleSeason(season.id)}
                         >
                             <span class="font-medium">{season.title}</span>
                             {#if expandedSeasons.includes(season.id)}
-                                <ChevronDownOutline class="w-5 h-5 text-gray-600" />
+                                <ChevronDownOutline class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                             {:else}
-                                <ChevronRightOutline class="w-5 h-5 text-gray-600" />
+                                <ChevronRightOutline class="w-5 h-5 text-gray-600 dark:text-gray-400" />
                             {/if}
                         </button>
                         {#if userConnected}
@@ -190,7 +190,7 @@
 
                     <!-- Season dates row (edit mode) -->
                     {#if editingRowId === season.id}
-                        <div class="p-3 bg-primary-50 dark:bg-primary-900/30 border-t border-gray-200">
+                        <div class="p-3 bg-primary-50 dark:bg-primary-900/30 border-t border-gray-200 dark:border-gray-700">
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="text-sm font-medium w-6">{seasonIndex + 1}</span>
                                 <span class="text-sm flex-1">{season.title}</span>
@@ -205,7 +205,7 @@
                                     <input
                                         type="date"
                                         bind:value={draftStart}
-                                        class="border rounded px-1 py-0.5 text-sm ml-1"
+                                        class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-1 py-0.5 text-sm ml-1"
                                     />
                                 </label>
                                 <label class="text-sm">
@@ -213,7 +213,7 @@
                                     <input
                                         type="date"
                                         bind:value={draftEnd}
-                                        class="border rounded px-1 py-0.5 text-sm ml-1"
+                                        class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-1 py-0.5 text-sm ml-1"
                                     />
                                 </label>
                                 <Button size="xs" color="light" onclick={() => autoFillFromEpisodes(season)}>
@@ -226,17 +226,17 @@
                                 <Button size="xs" color="light" onclick={cancelEdit}>Cancel</Button>
                             </div>
                             {#if validationError}
-                                <p class="text-red-500 text-xs mt-1">{validationError}</p>
+                                <p class="text-red-500 dark:text-red-400 text-xs mt-1">{validationError}</p>
                             {/if}
                         </div>
                     {:else}
                         <!-- Season dates row (read-only) -->
-                        <div class="p-3 border-t border-gray-200 bg-white">
+                        <div class="p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                             <div class="flex items-center gap-4 text-sm">
                                 <span class="w-6">{seasonIndex + 1}</span>
                                 <span class="flex-1">{season.title}</span>
-                                <span class="text-gray-600">Start: {formatUserDate(datesMap.get(season.id)?.startDate)}</span>
-                                <span class="text-gray-600">End: {formatUserDate(datesMap.get(season.id)?.endDate)}</span>
+                                <span class="text-gray-600 dark:text-gray-400">Start: {formatUserDate(datesMap.get(season.id)?.startDate)}</span>
+                                <span class="text-gray-600 dark:text-gray-400">End: {formatUserDate(datesMap.get(season.id)?.endDate)}</span>
                                 {#if userConnected}
                                     <div class="flex items-center gap-1">
                                         <Checkbox
@@ -252,9 +252,9 @@
 
                     <!-- Episode sub-table -->
                     {#if expandedSeasons.includes(season.id) && season.children.length > 0}
-                        <div class="p-3 bg-gray-50">
+                        <div class="p-3 bg-gray-50 dark:bg-gray-900">
                             <table class="w-full text-sm">
-                                <thead class="bg-gray-100 border-b">
+                                <thead class="bg-gray-100 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-700">
                                     <tr>
                                         <th class="p-2 text-left">#</th>
                                         <th class="p-2 text-left">Episode</th>
@@ -273,21 +273,21 @@
                                 <tbody>
                                     {#each season.children as episode, epIndex (episode.id)}
                                         {#if editingRowId === episode.id}
-                                            <tr class="border-b last:border-b-0 border-gray-300 bg-primary-50 dark:bg-primary-900/30">
+                                            <tr class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 bg-primary-50 dark:bg-primary-900/30">
                                                 <td class="p-2">{epIndex + 1}</td>
                                                 <td class="p-2">{episode.title}</td>
                                                 <td class="p-2">
                                                     {#if episode.duration}
                                                         {TimeUtil.formatDuration(episode.duration)}
                                                     {:else}
-                                                        <span class="text-gray-500 italic">N/A</span>
+                                                        <span class="text-gray-500 dark:text-gray-400 italic">N/A</span>
                                                     {/if}
                                                 </td>
                                                 <td class="p-2">
                                                     <input
                                                         type="date"
                                                         bind:value={draftStart}
-                                                        class="border rounded px-1 py-0.5 text-sm"
+                                                        class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-1 py-0.5 text-sm"
                                                     />
                                                 </td>
                                                 {#if userConnected}
@@ -311,14 +311,14 @@
                                                 {/if}
                                             </tr>
                                         {:else}
-                                            <tr class="border-b last:border-b-0 border-gray-300 hover:bg-gray-100">
+                                            <tr class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
                                                 <td class="p-2">{epIndex + 1}</td>
                                                 <td class="p-2">{episode.title}</td>
                                                 <td class="p-2">
                                                     {#if episode.duration}
                                                         {TimeUtil.formatDuration(episode.duration)}
                                                     {:else}
-                                                        <span class="text-gray-500 italic">N/A</span>
+                                                        <span class="text-gray-500 dark:text-gray-400 italic">N/A</span>
                                                     {/if}
                                                 </td>
                                                 <td class="p-2">{formatUserDate(datesMap.get(episode.id)?.endDate ?? datesMap.get(episode.id)?.startDate)}</td>
@@ -358,7 +358,7 @@
                         <div class="mb-6">
                             <h3 class="font-medium text-lg mb-2">{section.label}</h3>
                             <table class="w-full text-sm">
-                                <thead class="bg-gray-100 border-b">
+                                <thead class="bg-gray-100 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-700">
                                     <tr>
                                         <th class="p-2 text-left">#</th>
                                         <th class="p-2 text-left">Title</th>
@@ -372,21 +372,21 @@
                                 <tbody>
                                     {#each sectionChildren as child, index (child.id)}
                                         {#if editingRowId === child.id}
-                                            <tr class="border-b last:border-b-0 border-gray-300 bg-primary-50 dark:bg-primary-900/30">
+                                            <tr class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 bg-primary-50 dark:bg-primary-900/30">
                                                 <td class="p-2">{index + 1}</td>
                                                 <td class="p-2">{child.title}</td>
                                                 <td class="p-2">
                                                     {#if child.duration}
                                                         {TimeUtil.formatDuration(child.duration)}
                                                     {:else}
-                                                        <span class="text-gray-500 italic">N/A</span>
+                                                        <span class="text-gray-500 dark:text-gray-400 italic">N/A</span>
                                                     {/if}
                                                 </td>
                                                 <td class="p-2">
                                                     <input
                                                         type="date"
                                                         bind:value={draftStart}
-                                                        class="border rounded px-1 py-0.5 text-sm"
+                                                        class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-1 py-0.5 text-sm"
                                                     />
                                                 </td>
                                                 {#if userConnected}
@@ -410,14 +410,14 @@
                                                 {/if}
                                             </tr>
                                         {:else}
-                                            <tr class="border-b last:border-b-0 border-gray-300 hover:bg-gray-100">
+                                            <tr class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
                                                 <td class="p-2">{index + 1}</td>
                                                 <td class="p-2">{child.title}</td>
                                                 <td class="p-2">
                                                     {#if child.duration}
                                                         {TimeUtil.formatDuration(child.duration)}
                                                     {:else}
-                                                        <span class="text-gray-500 italic">N/A</span>
+                                                        <span class="text-gray-500 dark:text-gray-400 italic">N/A</span>
                                                     {/if}
                                                 </td>
                                                 <td class="p-2">{formatUserDate(datesMap.get(child.id)?.endDate ?? datesMap.get(child.id)?.startDate)}</td>
@@ -449,7 +449,7 @@
             {:else}
                 <!-- ANIME: flat table of episodes -->
                 <table class="w-full text-sm">
-                    <thead class="bg-gray-100 border-b">
+                    <thead class="bg-gray-100 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-700">
                         <tr>
                             <th class="p-2 text-left">#</th>
                             <th class="p-2 text-left">Episode</th>
@@ -463,21 +463,21 @@
                     <tbody>
                         {#each artifact.children as child, index (child.id)}
                             {#if editingRowId === child.id}
-                                <tr class="border-b last:border-b-0 border-gray-300 bg-primary-50 dark:bg-primary-900/30">
+                                <tr class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 bg-primary-50 dark:bg-primary-900/30">
                                     <td class="p-2">{index + 1}</td>
                                     <td class="p-2">{child.title}</td>
                                     <td class="p-2">
                                         {#if child.duration}
                                             {TimeUtil.formatDuration(child.duration)}
                                         {:else}
-                                            <span class="text-gray-500 italic">N/A</span>
+                                            <span class="text-gray-500 dark:text-gray-400 italic">N/A</span>
                                         {/if}
                                     </td>
                                     <td class="p-2">
                                         <input
                                             type="date"
                                             bind:value={draftStart}
-                                            class="border rounded px-1 py-0.5 text-sm"
+                                            class="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-1 py-0.5 text-sm"
                                         />
                                     </td>
                                     {#if userConnected}
@@ -501,14 +501,14 @@
                                     {/if}
                                 </tr>
                             {:else}
-                                <tr class="border-b last:border-b-0 border-gray-300 hover:bg-gray-100">
+                                <tr class="border-b last:border-b-0 border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800">
                                     <td class="p-2">{index + 1}</td>
                                     <td class="p-2">{child.title}</td>
                                     <td class="p-2">
                                         {#if child.duration}
                                             {TimeUtil.formatDuration(child.duration)}
                                         {:else}
-                                            <span class="text-gray-500 italic">N/A</span>
+                                            <span class="text-gray-500 dark:text-gray-400 italic">N/A</span>
                                         {/if}
                                     </td>
                                     <td class="p-2">{formatUserDate(datesMap.get(child.id)?.endDate ?? datesMap.get(child.id)?.startDate)}</td>
