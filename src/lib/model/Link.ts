@@ -5,6 +5,7 @@ export enum LinkType {
     HLTB = 'HLTB',
     IGDB = 'IGDB',
     ITAD = 'ITAD',
+    LETTERBOXD = 'LETTERBOXD',
     MAL = 'MAL',
     MANGABAKA = 'MANGABAKA',
     METACRITIC = 'METACRITIC',
@@ -23,6 +24,8 @@ export function getLinkTypeLabel(linkType: LinkType) {
             return 'IGDB';
         case LinkType.ITAD:
             return 'ITAD';
+        case LinkType.LETTERBOXD:
+            return 'Letterboxd';
         case LinkType.MAL:
             return 'MyAnimeList';
         case LinkType.MANGABAKA:
@@ -64,7 +67,7 @@ export function getGameLinkTypes() {
 }
 
 export function getMovieLinkTypes() {
-    return [LinkType.TMDB, LinkType.SENSCRITIQUE, LinkType.METACRITIC, LinkType.ROTTEN_TOMATOES];
+    return [LinkType.TMDB, LinkType.SENSCRITIQUE, LinkType.METACRITIC, LinkType.ROTTEN_TOMATOES, LinkType.LETTERBOXD];
 }
 
 export function getTvshowLinkTypes() {

@@ -4,6 +4,7 @@ import { Rating, RatingType } from "#lib/model/Rating";
 import { User, UserRights } from "#lib/model/User";
 import { RottenTomatoes } from "#lib/rottentomatoes/RottenTomatoes";
 import { SensCritique } from "#lib/senscritique/SensCritique";
+import { Letterboxd } from "#lib/letterboxd/Letterboxd";
 import { LinkDB } from "#lib/server/model/LinkDB";
 import { MovieDB } from "#lib/server/model/movie/MovieDB";
 import { TMDB } from "#lib/tmdb/TMDB";
@@ -16,7 +17,7 @@ export async function POST({ request, locals }: RequestEvent) {
     if (!user.hasRight(UserRights.CREATE_ARTIFACT)) {
         return error(403, "Forbidden");
     }
-    const { tmdbId, scId, mcId, rtId } = await request.json();
+    const { tmdbId, scId, mcId, rtId, lbId } = await request.json();
     if (!tmdbId) {
         return error(400, 'No TMDB ID provided');
     }
@@ -63,6 +64,14 @@ export async function POST({ request, locals }: RequestEvent) {
         }
         if (rtRatings.audience) {
             ratings.push(new Rating(RatingType.ROTTEN_TOMATOES_AUDIENCE, rtRatings.audience));
+        }
+    }
+
+    if (lbId) {
+        links.push(new Link(LinkType.LETTERBOXD, lbId));
+        const lbRating = await Letterboxd.getRating(lbId);
+        if (lbRating) {
+            ratings.push(new Rating(RatingType.LETTERBOXD, lbRating));
         }
     }
 

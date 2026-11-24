@@ -2,6 +2,7 @@ import type { ArtifactType } from "./Artifact";
 import type { ISerializable, Serializable } from "./Serializable";
 
 export enum RatingType {
+    LETTERBOXD = 'LETTERBOXD',
     MAL = 'MAL',
     METACRITIC = 'METACRITIC',
     OPENCRITIC = 'OPENCRITIC',
@@ -9,6 +10,29 @@ export enum RatingType {
     ROTTEN_TOMATOES_CRITICS = 'ROTTEN_TOMATOES_CRITICS',
     SENSCRITIQUE = 'SENSCRITIQUE',
     STEAM = 'STEAM'
+}
+
+export function getRatingTypeLabel(ratingType: RatingType): string {
+    switch (ratingType) {
+        case RatingType.LETTERBOXD:
+            return 'Letterboxd';
+        case RatingType.MAL:
+            return 'MyAnimeList';
+        case RatingType.METACRITIC:
+            return 'Metacritic';
+        case RatingType.OPENCRITIC:
+            return 'OpenCritic';
+        case RatingType.ROTTEN_TOMATOES_AUDIENCE:
+            return 'Rotten Tomatoes Audience';
+        case RatingType.ROTTEN_TOMATOES_CRITICS:
+            return 'Rotten Tomatoes Critics';
+        case RatingType.SENSCRITIQUE:
+            return 'SensCritique';
+        case RatingType.STEAM:
+            return 'Steam';
+        default:
+            return '';
+    }
 }
 
 export function getRatingColor(artifactType: ArtifactType, ratingType: RatingType, rating: number) {
@@ -32,6 +56,7 @@ export function getRatingColor(artifactType: ArtifactType, ratingType: RatingTyp
         case RatingType.OPENCRITIC:
         case RatingType.ROTTEN_TOMATOES_AUDIENCE:
         case RatingType.ROTTEN_TOMATOES_CRITICS:
+        case RatingType.LETTERBOXD:
         default:
             if (rating >= 90) return "green";
             if (rating >= 80) return "indigo";
