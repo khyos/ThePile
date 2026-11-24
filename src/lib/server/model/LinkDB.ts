@@ -48,6 +48,24 @@ export class LinkDB {
         return row ?? null;
     }
 
+    static async getArtifactsMissingLink(
+        artifactType: ArtifactType,
+        linkType: LinkType
+    ): Promise<{ id: number; title: string }[]> {
+        return await getDbRows<{ id: number; title: string }>(
+            `SELECT artifact.id, artifact.title
+             FROM artifact
+             WHERE artifact.type = ?
+               AND artifact.parent_artifact_id IS NULL
+               AND NOT EXISTS (
+                 SELECT 1 FROM link
+                 WHERE link.artifactId = artifact.id AND link.type = ?
+               )
+             ORDER BY artifact.title ASC`,
+            [artifactType, linkType]
+        );
+    }
+
     static async createLinkTable() {
         await runDbQuery(`CREATE TABLE IF NOT EXISTS link (
             artifactId INTEGER NOT NULL,
