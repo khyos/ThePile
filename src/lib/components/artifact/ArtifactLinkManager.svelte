@@ -36,6 +36,7 @@
 
     let refreshingAllLinks = false;
     let refreshingLinks: Record<string, boolean> = {};
+    let addingLink = false;
 
     let addSearchQuery: string = '';
     let addCandidates: Candidate[] = [];
@@ -94,14 +95,17 @@
         return !linkType || !linkUrl;
     }
 
-    function addLink() {
-        fetch(`/api/${artifact.type.toLowerCase()}/${artifact.id}/link`, {
-            method: "POST",
-            body: JSON.stringify({
-                type: addLinkType,
-                url: addLinkUrl,
-            }),
-        }).then((response) => {
+    async function addLink() {
+        if (addingLink) return;
+        addingLink = true;
+        try {
+            const response = await fetch(`/api/${artifact.type.toLowerCase()}/${artifact.id}/link`, {
+                method: "POST",
+                body: JSON.stringify({
+                    type: addLinkType,
+                    url: addLinkUrl,
+                }),
+            });
             if (response.status !== 200) {
                 alert("Failed to add link");
                 return;
@@ -111,10 +115,12 @@
             openAddLink = false;
             addLinkType = null;
             addLinkUrl = undefined;
-        }).catch(error => {
+        } catch (error) {
             console.error("Error adding link:", error);
             alert("Failed to add link");
-        });
+        } finally {
+            addingLink = false;
+        }
     }
 
     function openAddLinkModal() {
@@ -323,10 +329,11 @@
         <Button
             color="primary"
             onclick={addLink}
-            disabled={isLinkInputIncomplete(addLinkType, addLinkUrl)}>
-            Add Link
+            disabled={addingLink || isLinkInputIncomplete(addLinkType, addLinkUrl)}>
+            {#if addingLink}<Spinner size="4" class="mr-1" />{/if}
+            {addingLink ? "Adding..." : "Add Link"}
         </Button>
-        <Button color="alternative" onclick={() => (openAddLink = false)}>Cancel</Button>
+        <Button color="alternative" onclick={() => (openAddLink = false)} disabled={addingLink}>Cancel</Button>
     {/snippet}
 </Modal>
 
