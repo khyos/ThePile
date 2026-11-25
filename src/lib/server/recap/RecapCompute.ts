@@ -1,5 +1,11 @@
 import { ArtifactType } from '#lib/model/Artifact';
-import type { ItemRef, RecapEntry, RecapSlide, TypeCount } from '#lib/model/recap/RecapTypes';
+import type {
+	BacklogActivityCount,
+	ItemRef,
+	RecapEntry,
+	RecapSlide,
+	TypeCount
+} from '#lib/model/recap/RecapTypes';
 
 const MAIN_ARTIFACT_TYPES: ArtifactType[] = [
 	ArtifactType.GAME,
@@ -75,12 +81,23 @@ export function buildRecapSlides(
 	year: number,
 	currentEntries: RecapEntry[],
 	priorEntries: RecapEntry[],
-	genres: { name: string; count: number }[]
+	genres: { name: string; count: number }[],
+	backlogActivity: BacklogActivityCount[] = []
 ): RecapSlide[] {
 	const opening: RecapSlide = { kind: 'opening', year };
+	const activityByType = new Map(backlogActivity.map(activity => [activity.type, activity]));
+	const backlogChanges: RecapSlide = {
+		kind: 'backlog_changes',
+		counts: MAIN_ARTIFACT_TYPES.map(type => {
+			const activity = activityByType.get(type);
+			const added = activity?.added ?? 0;
+			const removed = activity?.removed ?? 0;
+			return { type, added, removed, delta: added - removed };
+		})
+	};
 
 	if (currentEntries.length === 0) {
-		return [opening, { kind: 'empty', year }];
+		return [opening, { kind: 'empty', year }, backlogChanges];
 	}
 
 	const slides: RecapSlide[] = [opening];
@@ -267,6 +284,7 @@ export function buildRecapSlides(
 	}
 
 	// Slide 11: Closing
+	slides.push(backlogChanges);
 	slides.push({ kind: 'closing', totalCount, year });
 
 	return slides;

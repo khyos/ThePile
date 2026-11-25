@@ -29,13 +29,14 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 	const priorYearStart = new Date(yearNum - 1, 0, 1).getTime();
 	const priorYearEnd = new Date(yearNum - 1, 11, 31, 23, 59, 59, 999).getTime();
 
-	const [currentEntries, priorEntries, genres] = await Promise.all([
+	const [currentEntries, priorEntries, genres, backlogActivity] = await Promise.all([
 		RecapDB.getYearEntries(user.id, yearStart, yearEnd),
 		RecapDB.getYearEntries(user.id, priorYearStart, priorYearEnd),
-		RecapDB.getTopGenres(user.id, yearStart, yearEnd)
+		RecapDB.getTopGenres(user.id, yearStart, yearEnd),
+		RecapDB.getYearBacklogActivity(user.id, yearStart, yearEnd)
 	]);
 
-	const slides = buildRecapSlides(yearNum, currentEntries, priorEntries, genres);
+	const slides = buildRecapSlides(yearNum, currentEntries, priorEntries, genres, backlogActivity);
 
 	return { year: yearNum, currentYear, slides } satisfies RecapPageData;
 };
