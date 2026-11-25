@@ -19,6 +19,8 @@
     };
     export let genres: Genre[] = [];
     export let platforms: Platform[] = [];
+    export let canCreateTierList: boolean = false;
+    export let onCreateTierList: (() => void) | undefined = undefined;
 </script>
 
 <Drawer
@@ -36,6 +38,8 @@
         <ListDrawerTabFilters
             {genres}
             {platforms}
+            {canCreateTierList}
+            {onCreateTierList}
         />
         <ListDrawerTabAdd />
     </Tabs>

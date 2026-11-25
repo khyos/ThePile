@@ -71,6 +71,42 @@ export class TierListUtil {
         return tierListId;
     }
 
+    static async createTierListFromArtifacts(userId: number, artifactType: ArtifactType, title: string, artifactIds: number[]): Promise<number> {
+        const userList = await ArtifactDB.getUserList(userId, artifactType);
+        const validIds = new Set(userList.artifacts.map(artifact => artifact.id));
+        const filteredIds = artifactIds.filter(id => validIds.has(id));
+
+        const tierListId = await TierListDB.insertTierList(userId, null, artifactType, title, true);
+
+        const tierIds: number[] = [];
+        for (let i = 0; i < DEFAULT_TIERS.length; i++) {
+            const tierId = await TierListDB.insertTier(tierListId, DEFAULT_TIERS[i].label, DEFAULT_TIERS[i].color, i);
+            tierIds.push(tierId);
+        }
+
+        const userInfos = await ArtifactDB.getUserInfos(userId, filteredIds);
+        const scoreMap = new Map<number, number | null>();
+        for (const userInfo of userInfos) {
+            scoreMap.set(userInfo.artifactId, userInfo.score);
+        }
+
+        const positions = new Map<number | null, number>();
+        const nextPosition = (tierId: number | null) => {
+            const position = positions.get(tierId) ?? 0;
+            positions.set(tierId, position + 1);
+            return position;
+        };
+
+        for (const artifactId of filteredIds) {
+            const score = scoreMap.get(artifactId) ?? null;
+            const tierIndex = TierListUtil.tierIndexForScore(score);
+            const tierId = tierIndex === null ? null : tierIds[tierIndex];
+            await TierListDB.insertItem(tierListId, artifactId, tierId, nextPosition(tierId));
+        }
+
+        return tierListId;
+    }
+
     static async createStandaloneTierList(userId: number, artifactType: ArtifactType, title: string): Promise<number> {
         const tierListId = await TierListDB.insertTierList(userId, null, artifactType, title, true);
 

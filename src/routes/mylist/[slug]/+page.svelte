@@ -8,6 +8,7 @@
     import DrawerShortcut from "#lib/ui/DrawerShortcut.svelte";
     import type { PageData } from "./$types";
     import ListDrawer from "./components/ListDrawer.svelte";
+    import CreateTierListFromListModal from "./components/CreateTierListFromListModal.svelte";
     import { TimeUtil } from "#lib/util/TimeUtil";
     import ListItemComp from "./components/ListItemComp.svelte";
     import SortableHeadCell from "./components/SortableHeadCell.svelte";
@@ -30,6 +31,13 @@
     }, 0);
 
     $: orderBy = $userListStore.userListFilters.orderBy;
+
+    let showCreateTierListModal = false;
+
+    function onTierListCreated(id: number) {
+        showCreateTierListModal = false;
+        window.location.href = `/tierlist/${id}`;
+    }
 
     function setSort(type: UserListOrder) {
         userListStore.update((store) => {
@@ -96,7 +104,17 @@
     </TableBody>
 </Table>
 
-<ListDrawer 
+<ListDrawer
     {genres}
     {platforms}
+    canCreateTierList={data.canCreateTierList}
+    onCreateTierList={() => (showCreateTierListModal = true)}
 />
+
+{#if data.canCreateTierList}
+    <CreateTierListFromListModal
+        bind:open={showCreateTierListModal}
+        onClose={() => (showCreateTierListModal = false)}
+        onCreated={onTierListCreated}
+    />
+{/if}
