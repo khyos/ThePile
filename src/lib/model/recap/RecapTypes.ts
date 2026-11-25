@@ -17,6 +17,16 @@ export type TypeCount = {
 	totalDuration: number;
 };
 
+export type BacklogActivityCount = {
+	type: ArtifactType;
+	added: number;
+	removed: number;
+};
+
+export type BacklogChangeCount = BacklogActivityCount & {
+	delta: number;
+};
+
 export type YearSummary = {
 	year: number;
 	totalCount: number;
@@ -42,6 +52,7 @@ export type RecapSlide =
 	| { kind: 'empty'; year: number }
 	| { kind: 'grand_total'; totalCount: number; totalDuration: number }
 	| { kind: 'by_type'; counts: TypeCount[]; mediaType: ArtifactType }
+	| { kind: 'backlog_changes'; counts: BacklogChangeCount[] }
 	| { kind: 'top_genres'; genres: { name: string; count: number }[] }
 	| { kind: 'monthly'; bars: { label: string; showLabel: boolean; value: number }[] }
 	| { kind: 'year_comparison'; current: YearSummary; prior: YearSummary | null }

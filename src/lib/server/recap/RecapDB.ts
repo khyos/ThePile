@@ -1,7 +1,7 @@
 import { ArtifactType } from '#lib/model/Artifact';
 import { UserArtifactStatus } from '#lib/model/UserArtifact';
 import { getDbRows } from '#lib/server/database';
-import type { RecapEntry } from '#lib/model/recap/RecapTypes';
+import type { BacklogActivityCount, RecapEntry } from '#lib/model/recap/RecapTypes';
 
 const TRACKED_TYPES = [
 	ArtifactType.GAME,
@@ -17,6 +17,16 @@ const TRACKED_TYPES = [
 	ArtifactType.COMICS
 ];
 
+const MAIN_ARTIFACT_TYPES = [
+	ArtifactType.GAME,
+	ArtifactType.MOVIE,
+	ArtifactType.TVSHOW,
+	ArtifactType.ANIME,
+	ArtifactType.MANGA
+];
+
+const RELEASE_DATE_SENTINEL = 7258118400000;
+
 type RawEntry = {
 	id: number;
 	title: string;
@@ -26,6 +36,12 @@ type RawEntry = {
 	score: number | null;
 	endDate: number;
 	startDate: number | null;
+};
+
+type RawBacklogActivityCount = {
+	type: ArtifactType;
+	added: number;
+	removed: number;
 };
 
 type RawGenre = {
@@ -50,6 +66,33 @@ export const RecapDB = {
 			[userId, UserArtifactStatus.FINISHED, yearStart, yearEnd, ...TRACKED_TYPES]
 		);
 		return rows;
+	},
+
+	async getYearBacklogActivity(userId: number, yearStart: number, yearEnd: number): Promise<BacklogActivityCount[]> {
+		const placeholders = MAIN_ARTIFACT_TYPES.map(() => '?').join(', ');
+		const rows = await getDbRows<RawBacklogActivityCount>(
+			`SELECT artifact.type AS type,
+			        COUNT(DISTINCT CASE
+			            WHEN artifact.releaseDate >= ? AND artifact.releaseDate <= ?
+			                 AND artifact.releaseDate != ? THEN artifact.id
+			        END) AS added,
+			        COUNT(DISTINCT CASE
+			            WHEN user_artifact.endDate >= ? AND user_artifact.endDate <= ? THEN artifact.id
+			        END) AS removed
+			 FROM user_artifact
+			 JOIN artifact ON artifact.id = user_artifact.artifactId
+			 WHERE user_artifact.userId = ?
+			   AND user_artifact.status IS NOT NULL
+			   AND artifact.type IN (${placeholders})
+			 GROUP BY artifact.type`,
+			[yearStart, yearEnd, RELEASE_DATE_SENTINEL, yearStart, yearEnd, userId, ...MAIN_ARTIFACT_TYPES]
+		);
+
+		const countsByType = new Map(rows.map(row => [row.type, row]));
+		return MAIN_ARTIFACT_TYPES.map(type => {
+			const counts = countsByType.get(type);
+			return { type, added: counts?.added ?? 0, removed: counts?.removed ?? 0 };
+		});
 	},
 
 	async getTopGenres(

@@ -91,6 +91,36 @@ describe('only non-main type entries present', () => {
     });
 });
 
+describe('backlog changes slide', () => {
+    it('shows all five main types and calculates added minus removed even without finished entries', () => {
+        const slides = buildRecapSlides(2024, [], [], [], [
+            { type: ArtifactType.GAME, added: 5, removed: 2 },
+            { type: ArtifactType.MOVIE, added: 1, removed: 3 }
+        ]);
+        const slide = slides.find(s => s.kind === 'backlog_changes') as Extract<RecapSlide, { kind: 'backlog_changes' }>;
+
+        expect(slide.counts).toHaveLength(5);
+        expect(slide.counts.map(c => c.type)).toEqual([
+            ArtifactType.GAME,
+            ArtifactType.MOVIE,
+            ArtifactType.TVSHOW,
+            ArtifactType.ANIME,
+            ArtifactType.MANGA
+        ]);
+        expect(slide.counts.find(c => c.type === ArtifactType.GAME)).toEqual({
+            type: ArtifactType.GAME, added: 5, removed: 2, delta: 3
+        });
+        expect(slide.counts.find(c => c.type === ArtifactType.MOVIE)).toEqual({
+            type: ArtifactType.MOVIE, added: 1, removed: 3, delta: -2
+        });
+        for (const type of [ArtifactType.TVSHOW, ArtifactType.ANIME, ArtifactType.MANGA]) {
+            expect(slide.counts.find(c => c.type === type)).toEqual({
+                type, added: 0, removed: 0, delta: 0
+            });
+        }
+    });
+});
+
 // ─── Group 2: Entries with duration = 0 ──────────────────────────────────────
 //
 // The implementation uses reduce / sort for both totalDuration and longest, so 0

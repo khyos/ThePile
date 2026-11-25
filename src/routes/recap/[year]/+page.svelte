@@ -7,6 +7,7 @@
     import SlideEmpty from './components/slides/SlideEmpty.svelte';
     import Slide02GrandTotal from './components/slides/Slide02GrandTotal.svelte';
     import Slide03ByType from './components/slides/Slide03ByType.svelte';
+    import SlideBacklogChanges from './components/slides/SlideBacklogChanges.svelte';
     import Slide04TopGenres from './components/slides/Slide04TopGenres.svelte';
     import Slide05Monthly from './components/slides/Slide05Monthly.svelte';
     import Slide06YearComparison from './components/slides/Slide06YearComparison.svelte';
@@ -107,6 +108,8 @@
                 <Slide02GrandTotal totalCount={slide.totalCount} totalDuration={slide.totalDuration} />
             {:else if slide.kind === 'by_type'}
                 <Slide03ByType counts={slide.counts} mediaType={slide.mediaType} />
+            {:else if slide.kind === 'backlog_changes'}
+                <SlideBacklogChanges counts={slide.counts} year={data.year} />
             {:else if slide.kind === 'top_genres'}
                 <Slide04TopGenres genres={slide.genres} />
             {:else if slide.kind === 'monthly'}
