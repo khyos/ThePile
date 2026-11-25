@@ -64,6 +64,23 @@ function sortedIds(items: Movie[], type: UserListOrder, direction: 'asc' | 'desc
     return filterUserListItems(items, ArtifactType.MOVIE, filtersWith(type, direction)).map((i) => i.id);
 }
 
+describe('createUserListFilters — release date ranges', () => {
+    it.each([
+        [ArtifactType.ANIME, 1917],
+        [ArtifactType.MANGA, 1900]
+    ])('sets the expected historical minimum for %s', (artifactType, minYear) => {
+        const filters = createUserListFilters(artifactType);
+        const maxYear = new Date().getFullYear() + 1;
+
+        expect(filters.releaseDate).toEqual({
+            min: minYear,
+            max: maxYear,
+            absoluteMin: minYear,
+            absoluteMax: maxYear
+        });
+    });
+});
+
 // ---------------------------------------------------------------------------
 // Contract 1 + 2: each UserListOrder sorts by its field; asc vs desc reverses.
 // ---------------------------------------------------------------------------

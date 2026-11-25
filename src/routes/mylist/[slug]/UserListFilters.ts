@@ -7,6 +7,8 @@ const currentYear = new Date().getFullYear();
 const maxReleaseYear = currentYear + 1;
 
 const CONSUMPTION_DATE_MIN = 1970;
+const ANIME_RELEASE_DATE_MIN = 1917;
+const MANGA_RELEASE_DATE_MIN = 1900;
 const GAME_RELEASE_DATE_MIN = 1970;
 const GAME_RELEASE_DATE_MAX = maxReleaseYear;
 const MOVIE_RELEASE_DATE_MIN = 1895;
@@ -108,7 +110,17 @@ export function createUserListFilters(artifactType: ArtifactType): UserListFilte
             absoluteMax: currentYear
         }
     }
-    if (artifactType === ArtifactType.GAME) {
+    if (artifactType === ArtifactType.ANIME) {
+        filters.releaseDate.min = ANIME_RELEASE_DATE_MIN;
+        filters.releaseDate.max = maxReleaseYear;
+        filters.releaseDate.absoluteMin = ANIME_RELEASE_DATE_MIN;
+        filters.releaseDate.absoluteMax = maxReleaseYear;
+    } else if (artifactType === ArtifactType.MANGA) {
+        filters.releaseDate.min = MANGA_RELEASE_DATE_MIN;
+        filters.releaseDate.max = maxReleaseYear;
+        filters.releaseDate.absoluteMin = MANGA_RELEASE_DATE_MIN;
+        filters.releaseDate.absoluteMax = maxReleaseYear;
+    } else if (artifactType === ArtifactType.GAME) {
         filters.duration.max = GAME_MAX_DURATION;
         filters.duration.absoluteMax = GAME_MAX_DURATION;
         filters.duration.unit = 'hours';
