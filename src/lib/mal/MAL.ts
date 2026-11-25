@@ -2,14 +2,17 @@ import { AnimeDB } from "#lib/server/model/anime/AnimeDB";
 import { MangaDB } from "#lib/server/model/manga/MangaDB";
 import { ErrorUtil } from "#lib/util/ErrorUtil";
 
+export interface MALDateRange {
+    from?: string;
+    to?: string;
+    string?: string;
+}
+
 export interface MALAnime {
     malId: number;
     title: string;
     synopsis?: string;
-    aired: {
-        from?: string;
-        to?: string;
-    };
+    aired: MALDateRange;
     duration?: string;
     score?: number;
     imageUrl?: string;
@@ -25,10 +28,7 @@ export interface MALManga {
     title: string;
     synopsis?: string;
     status?: string;
-    published?: {
-        from?: string;
-        to?: string;
-    };
+    published?: MALDateRange;
     endDate?: string;
     volumes?: number;
     chapters?: number;
@@ -101,7 +101,7 @@ export class MAL {
                 title: anime.title,
                 synopsis: anime.synopsis,
                 episodes: anime.episodes,
-                aired: anime.aired,
+                aired: this.normalizeDateRange(anime.aired),
                 duration: anime.duration,
                 score: score,
                 genres: anime.genres,
@@ -218,6 +218,62 @@ export class MAL {
         return null;
     }
 
+    static parseDateRange(dateRange?: string | null): { from?: string; to?: string } {
+        if (!dateRange?.trim()) return {};
+
+        const [start, end] = dateRange.trim().split(/\s+to\s+/i, 2);
+        return {
+            from: this.parseDate(start, false),
+            to: end === undefined ? undefined : this.parseDate(end, true)
+        };
+    }
+
+    private static parseDate(date: string, isEnd: boolean): string | undefined {
+        const value = date.trim();
+        const yearOnly = value.match(/^(\d{4})$/);
+        if (yearOnly) {
+            return `${yearOnly[1]}-${isEnd ? "12-31" : "01-01"}`;
+        }
+
+        const monthNames = [
+            ["Jan", "January"], ["Feb", "February"], ["Mar", "March"], ["Apr", "April"],
+            ["May"], ["Jun", "June"], ["Jul", "July"], ["Aug", "August"],
+            ["Sep", "September"], ["Oct", "October"], ["Nov", "November"], ["Dec", "December"]
+        ];
+        const fullDate = value.match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})$/);
+        const monthYear = value.match(/^([A-Za-z]+)\s+(\d{4})$/);
+        const match = fullDate ?? monthYear;
+        if (!match) return undefined;
+
+        const month = match[1].toLowerCase();
+        const monthIndex = monthNames.findIndex(names => names.some(name => name.toLowerCase() === month));
+        if (monthIndex < 0) return undefined;
+
+        const monthNumber = String(monthIndex + 1).padStart(2, "0");
+        const yearText = match[fullDate ? 3 : 2];
+        const year = Number(yearText);
+        const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+        const daysInMonth = [31, isLeapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][monthIndex];
+        if (fullDate) {
+            const day = Number(match[2]);
+            if (day < 1 || day > daysInMonth) return undefined;
+            return `${yearText}-${monthNumber}-${String(day).padStart(2, "0")}`;
+        }
+
+        return `${yearText}-${monthNumber}-${String(isEnd ? daysInMonth : 1).padStart(2, "0")}`;
+    }
+
+    private static normalizeDateRange(range?: MALDateRange | null): MALDateRange {
+        if (range?.from && range?.to) return range;
+
+        const parsed = this.parseDateRange(range?.string);
+        return {
+            ...range,
+            from: range?.from ?? parsed.from,
+            to: range?.to ?? parsed.to
+        };
+    }
+
     static async searchManga(query: string): Promise<{
         id: number;
         name: string;
@@ -265,7 +321,7 @@ export class MAL {
                 title: manga.title,
                 synopsis: manga.synopsis,
                 status: manga.status ?? undefined,
-                published: manga.published ?? undefined,
+                published: manga.published ? this.normalizeDateRange(manga.published) : undefined,
                 endDate: manga.endDate ?? undefined,
                 volumes: manga.volumes ?? undefined,
                 chapters: manga.chapters ?? undefined,
