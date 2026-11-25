@@ -4,14 +4,15 @@ import { UserArtifactStatus } from "#lib/model/UserArtifact";
 import type { Game } from "#lib/model/game/Game";
 
 const currentYear = new Date().getFullYear();
+const maxReleaseYear = currentYear + 1;
 
 const CONSUMPTION_DATE_MIN = 1970;
 const GAME_RELEASE_DATE_MIN = 1970;
-const GAME_RELEASE_DATE_MAX = currentYear;
+const GAME_RELEASE_DATE_MAX = maxReleaseYear;
 const MOVIE_RELEASE_DATE_MIN = 1895;
-const MOVIE_RELEASE_DATE_MAX = currentYear;
+const MOVIE_RELEASE_DATE_MAX = maxReleaseYear;
 const TVSHOW_RELEASE_DATE_MIN = 1930;
-const TVSHOW_RELEASE_DATE_MAX = currentYear;
+const TVSHOW_RELEASE_DATE_MAX = maxReleaseYear;
 const GAME_MAX_DURATION = 200;
 const MOVIE_MAX_DURATION = 240;
 const TVSHOW_MAX_DURATION = 400;
@@ -205,6 +206,7 @@ export function filterUserListItems(items: Artifact[], artifactType: ArtifactTyp
     }
     if (filters.releaseDate.min > filters.releaseDate.absoluteMin
         || filters.releaseDate.max < filters.releaseDate.absoluteMax) {
+        const noUpperBound = filters.releaseDate.max >= filters.releaseDate.absoluteMax;
         items = items.filter((item) => {
             const artifactYearString = item.releaseDate;
             let artifactYear: number | null = null;
@@ -214,7 +216,7 @@ export function filterUserListItems(items: Artifact[], artifactType: ArtifactTyp
             return (
                 artifactYear == null ||
                 (artifactYear >= filters.releaseDate.min &&
-                artifactYear <= filters.releaseDate.max)
+                (noUpperBound || artifactYear <= filters.releaseDate.max))
             );
         });
     }

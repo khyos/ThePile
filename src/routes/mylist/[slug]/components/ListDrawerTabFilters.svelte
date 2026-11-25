@@ -1,5 +1,6 @@
 <script lang="ts">
     import {
+        Button,
         Label,
         MultiSelect,
         Range,
@@ -14,6 +15,8 @@
 
     export let genres: Genre[] = [];
     export let platforms: Platform[] = [];
+    export let canCreateTierList: boolean = false;
+    export let onCreateTierList: (() => void) | undefined = undefined;
 
     $: userListStoreInst = $userListStore;
 
@@ -27,6 +30,10 @@
 
     let genreItems = genres.map((genre) => { return { value: genre.id, name: genre.title } }) ;
     let platformItems = platforms.map((platform) => { return { value: platform.id, name: platform.title } }) ;
+
+    const formatReleaseYear = (year: number) => {
+        return year === $userListStore.userListFilters.releaseDate.absoluteMax ? "Future" : `${year}`;
+    };
 
     const formatDurationDisplay = (duration: number) => {
         if (userListStoreInst.userList.artifactType === ArtifactType.GAME || userListStoreInst.userList.artifactType === ArtifactType.TVSHOW) {
@@ -59,7 +66,7 @@
         bind:maxValue={$userListStore.userListFilters.score.max}
     />
     <Label class="block mb-1 mt-2"
-        >Release Date: {$userListStore.userListFilters.releaseDate.min} to {$userListStore.userListFilters.releaseDate.max}</Label
+        >Release Date: {formatReleaseYear($userListStore.userListFilters.releaseDate.min)} to {formatReleaseYear($userListStore.userListFilters.releaseDate.max)}</Label
     >
     <DoubleRange
         min={$userListStore.userListFilters.releaseDate.absoluteMin}
@@ -100,5 +107,8 @@
             items={platformItems}
             bind:value={$userListStore.userListFilters.platforms.included}
         />
+    {/if}
+    {#if canCreateTierList}
+        <Button class="mt-4 w-full" onclick={onCreateTierList}>Create Tier List</Button>
     {/if}
 </TabItem>

@@ -24,6 +24,21 @@ export async function POST({ request, locals }: RequestEvent) {
         return json({ id });
     }
 
+    if (Array.isArray(body.artifactIds)) {
+        const { artifactType, title, artifactIds } = body as { artifactType: ArtifactType; title: string; artifactIds: number[] };
+        if (!artifactType || !title || !title.trim()) {
+            return error(400, 'Missing artifactType or title');
+        }
+        if (!TIER_LIST_ARTIFACT_TYPES.includes(artifactType)) {
+            return error(400, 'Invalid artifact type');
+        }
+        if (!artifactIds.every(id => typeof id === 'number')) {
+            return error(400, 'Invalid artifactIds');
+        }
+        const id = await TierListUtil.createTierListFromArtifacts(user.id, artifactType, title.trim(), artifactIds);
+        return json({ id });
+    }
+
     const { artifactType, title } = body as { artifactType: ArtifactType; title: string };
     if (!artifactType || !title) {
         return error(400, 'Missing artifactType or title');
