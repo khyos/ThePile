@@ -14,7 +14,9 @@ function makeMockBrowser(textContent: string | null) {
         waitForSelector: textContent !== null
             ? vi.fn().mockResolvedValue(undefined)
             : vi.fn().mockRejectedValue(new Error('Timeout')),
+        evaluate: vi.fn().mockResolvedValue(null),
         $eval: mockEval,
+        content: vi.fn().mockResolvedValue('<html>page content</html>'),
     };
     const mockBrowser = {
         newPage: vi.fn().mockResolvedValue(mockPage),
@@ -46,11 +48,8 @@ describe('Letterboxd.getRating', () => {
     it('navigates to the correct Letterboxd URL for the given slug', async () => {
         const { mockPage } = makeMockBrowser(null);
         await Letterboxd.getRating('the-dark-knight');
-        expect(mockPage.goto).toHaveBeenCalledWith(
-            'https://letterboxd.com/film/the-dark-knight/',
-            expect.objectContaining({ timeout: 20000 })
-        );
-        expect(mockPage.waitForSelector).toHaveBeenCalledWith('.averagerating', expect.objectContaining({ timeout: 10000 }));
+        expect(mockPage.goto).toHaveBeenCalledWith('https://letterboxd.com/film/the-dark-knight/');
+        expect(mockPage.waitForSelector).toHaveBeenCalledWith('.averagerating', { timeout: 10000 });
     });
 
     // --- Absent / unparseable element ---
@@ -58,6 +57,15 @@ describe('Letterboxd.getRating', () => {
     it('returns null when .averagerating element is absent', async () => {
         makeMockBrowser(null);
         await expect(Letterboxd.getRating('some-film')).resolves.toBeNull();
+    });
+
+    it('reads the average rating from Letterboxd metadata', async () => {
+        const { mockPage } = makeMockBrowser(null);
+        mockPage.evaluate.mockResolvedValue('4.37 out of 5');
+
+        await expect(Letterboxd.getRating('some-film')).resolves.toBe(87);
+
+        expect(mockPage.waitForSelector).not.toHaveBeenCalled();
     });
 
     it('returns null when .averagerating text cannot be parsed as a float', async () => {

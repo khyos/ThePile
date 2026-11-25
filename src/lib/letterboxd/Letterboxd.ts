@@ -9,9 +9,26 @@ export class Letterboxd {
             browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });
             const page = await browser.newPage();
             await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-            await page.goto(`https://letterboxd.com/film/${slug}/`, { timeout: 20000 });
-            await page.waitForSelector('.averagerating', { timeout: 10000 });
-            const rawValue = await page.$eval('.averagerating', el => el.textContent?.trim() ?? null).catch(() => null);
+            await page.goto(`https://letterboxd.com/film/${slug}/`);
+            let rawValue = await page.evaluate(() => {
+                const averageRatingLabel = Array.from(document.querySelectorAll<HTMLMetaElement>('meta[name^="twitter:label"]'))
+                    .find(meta => meta.content.trim().toLowerCase() === 'average rating');
+                if (averageRatingLabel) {
+                    const dataName = averageRatingLabel.name.replace('label', 'data');
+                    const metaValue = document.querySelector<HTMLMetaElement>(`meta[name="${dataName}"]`)?.content;
+                    if (metaValue) return metaValue;
+                }
+                return document.querySelector('.averagerating')?.textContent?.trim() ?? null;
+            });
+            if (!rawValue) {
+                try {
+                    await page.waitForSelector('.averagerating', { timeout: 10000 });
+                    rawValue = await page.$eval('.averagerating', el => el.textContent?.trim() ?? null);
+                } catch (e) {
+                    console.error(e);
+                    return null;
+                }
+            }
             if (!rawValue) return null;
             const normalized = Math.round(parseFloat(rawValue) * 20);
             return isNaN(normalized) ? null : normalized;
