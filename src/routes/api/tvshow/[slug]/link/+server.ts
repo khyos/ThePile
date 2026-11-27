@@ -1,5 +1,6 @@
 import { MetaCritic } from "#lib/metacritic/MetaCritic";
-import { LinkType } from "#lib/model/Link";
+import { ArtifactType } from "#lib/model/Artifact";
+import { isLinkTypeRemovable, LinkType } from "#lib/model/Link";
 import { RatingType } from "#lib/model/Rating";
 import { User, UserRights } from "#lib/model/User";
 import { RottenTomatoes } from "#lib/rottentomatoes/RottenTomatoes";
@@ -124,6 +125,33 @@ export async function PUT({ params, request, locals }: RequestEvent) {
         }
     }
     return json({ success: true });
+}
+
+export async function DELETE({ params, url, locals }: RequestEvent) {
+    const user = User.deserialize(locals.user);
+    if (!user.hasRight(UserRights.EDIT_ARTIFACT)) {
+        return error(403, "Forbidden");
+    }
+    const tvshowId = parseInt(params.slug);
+    const type = url.searchParams.get("type") as LinkType | null;
+    if (!type || !isLinkTypeRemovable(ArtifactType.TVSHOW, type)) {
+        return error(400, "Invalid link type");
+    }
+
+    await cleanupLinkData(tvshowId, type);
+    await LinkDB.deleteLink(tvshowId, type);
+    return json({ success: true });
+}
+
+const cleanupLinkData = async (tvshowId: number, type: LinkType): Promise<void> => {
+    if (type === LinkType.SENSCRITIQUE) {
+        await RatingDB.deleteRating(tvshowId, RatingType.SENSCRITIQUE);
+    } else if (type === LinkType.METACRITIC) {
+        await RatingDB.deleteRating(tvshowId, RatingType.METACRITIC);
+    } else if (type === LinkType.ROTTEN_TOMATOES) {
+        await RatingDB.deleteRating(tvshowId, RatingType.ROTTEN_TOMATOES_CRITICS);
+        await RatingDB.deleteRating(tvshowId, RatingType.ROTTEN_TOMATOES_AUDIENCE);
+    }
 }
 
 const updateTMDB = async (tvshowId: number, url: string) => {

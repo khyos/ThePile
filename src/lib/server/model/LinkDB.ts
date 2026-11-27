@@ -11,6 +11,10 @@ export class LinkDB {
         return await runDbQuery(`UPDATE link SET url = ? WHERE artifactId = ?  AND type = ?`, [url, artifactId, type]);
     }
 
+    static async deleteLink(artifactId: number, type: string): Promise<void> {
+        return await runDbQuery(`DELETE FROM link WHERE artifactId = ? AND type = ?`, [artifactId, type]);
+    }
+
     static async exists(type: LinkType, url: string, artifactType: ArtifactType): Promise<boolean> {
         const row = await getDbRow<ILinkDB>(
             `SELECT * FROM link INNER JOIN artifact ON link.artifactId = artifact.id

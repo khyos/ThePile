@@ -1,5 +1,6 @@
 import { MetaCritic } from "#lib/metacritic/MetaCritic";
-import { LinkType } from "#lib/model/Link";
+import { ArtifactType } from "#lib/model/Artifact";
+import { isLinkTypeRemovable, LinkType } from "#lib/model/Link";
 import { RatingType } from "#lib/model/Rating";
 import { User, UserRights } from "#lib/model/User";
 import { Letterboxd } from "#lib/letterboxd/Letterboxd";
@@ -161,4 +162,33 @@ export async function PUT({ params, request, locals }: RequestEvent) {
         }
     }
     return json({ success: true });
+}
+
+export async function DELETE({ params, url, locals }: RequestEvent) {
+    const user = User.deserialize(locals.user);
+    if (!user.hasRight(UserRights.EDIT_ARTIFACT)) {
+        return error(403, "Forbidden");
+    }
+    const movieId = parseInt(params.slug);
+    const type = url.searchParams.get("type") as LinkType | null;
+    if (!type || !isLinkTypeRemovable(ArtifactType.MOVIE, type)) {
+        return error(400, "Invalid link type");
+    }
+
+    await cleanupLinkData(movieId, type);
+    await LinkDB.deleteLink(movieId, type);
+    return json({ success: true });
+}
+
+const cleanupLinkData = async (movieId: number, type: LinkType): Promise<void> => {
+    if (type === LinkType.SENSCRITIQUE) {
+        await RatingDB.deleteRating(movieId, RatingType.SENSCRITIQUE);
+    } else if (type === LinkType.METACRITIC) {
+        await RatingDB.deleteRating(movieId, RatingType.METACRITIC);
+    } else if (type === LinkType.LETTERBOXD) {
+        await RatingDB.deleteRating(movieId, RatingType.LETTERBOXD);
+    } else if (type === LinkType.ROTTEN_TOMATOES) {
+        await RatingDB.deleteRating(movieId, RatingType.ROTTEN_TOMATOES_CRITICS);
+        await RatingDB.deleteRating(movieId, RatingType.ROTTEN_TOMATOES_AUDIENCE);
+    }
 }

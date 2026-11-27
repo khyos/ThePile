@@ -82,6 +82,28 @@ export function getMangaLinkTypes() {
     return [LinkType.MAL, LinkType.SENSCRITIQUE, LinkType.MANGABAKA];
 }
 
+export function getProtectedLinkTypes(artifactType: ArtifactType): LinkType[] {
+    switch (artifactType) {
+        case ArtifactType.GAME:
+            return [LinkType.IGDB];
+        case ArtifactType.MOVIE:
+            return [LinkType.TMDB];
+        case ArtifactType.TVSHOW:
+            return [LinkType.TMDB];
+        case ArtifactType.ANIME:
+            return [LinkType.MAL];
+        case ArtifactType.MANGA:
+            return [LinkType.MAL, LinkType.MANGABAKA];
+        default:
+            return [];
+    }
+}
+
+export function isLinkTypeRemovable(artifactType: ArtifactType, linkType: LinkType): boolean {
+    return getLinkTypesByArtifactType(artifactType).includes(linkType)
+        && !getProtectedLinkTypes(artifactType).includes(linkType);
+}
+
 
 export const SERIALIZE_TYPE = 'Link';
 
