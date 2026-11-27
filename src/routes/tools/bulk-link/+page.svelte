@@ -19,6 +19,7 @@
     type BulkLinkRow = {
         id: number;
         title: string;
+        year: number | null;
         inputValue: string;
         searchLoading: boolean;
         candidates: { id: string; name: string; date?: string }[];
@@ -53,6 +54,7 @@
         rows = data.artifacts.map(a => ({
             id: a.id,
             title: a.title,
+            year: a.year ?? null,
             inputValue: '',
             searchLoading: false,
             candidates: [],
@@ -215,7 +217,7 @@
                     <TableBodyRow class={row.done ? 'opacity-50' : ''}>
                         <TableBodyCell>
                             <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-                            <a href="/{selectedType}/{row.id}" class="font-medium text-blue-600 dark:text-blue-400 hover:underline">{row.title}</a>
+                            <a href="/{selectedType}/{row.id}" class="font-medium text-blue-600 dark:text-blue-400 hover:underline">{row.title}</a>{#if row.year} <span class="text-gray-400 dark:text-gray-500 text-sm ml-1">({row.year})</span>{/if}
                         </TableBodyCell>
                         <TableBodyCell>
                             {#if row.done}

@@ -23,13 +23,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
     const linkType = url.searchParams.get('linkType') ?? '';
 
     if (!ROOT_ARTIFACT_TYPES.has(type)) {
-        return { artifacts: [] as { id: number; title: string }[], type: '', linkType: '' };
+        return { artifacts: [] as { id: number; title: string; year: number | null }[], type: '', linkType: '' };
     }
 
     const artifactType = type as ArtifactType;
     const validLinkTypes = getLinkTypesByArtifactType(artifactType);
     if (!validLinkTypes.some(lt => lt === linkType)) {
-        return { artifacts: [] as { id: number; title: string }[], type: '', linkType: '' };
+        return { artifacts: [] as { id: number; title: string; year: number | null }[], type: '', linkType: '' };
     }
 
     const artifacts = await LinkDB.getArtifactsMissingLink(artifactType, linkType as LinkType);

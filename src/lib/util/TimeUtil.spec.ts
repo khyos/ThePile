@@ -22,6 +22,10 @@ describe('TimeUtil', () => {
         it('should handle zero duration', () => {
             expect(TimeUtil.formatDuration(0)).toBe('0h');
         });
+
+        it('should return 0h for negative durations (<= 0 contract)', () => {
+            expect(TimeUtil.formatDuration(-100)).toBe('0h');
+        });
     });
 
     describe('formatDate', () => {

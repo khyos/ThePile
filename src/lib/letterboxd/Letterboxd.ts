@@ -3,7 +3,7 @@ import type { SearchResult } from '#lib/types/SearchResult';
 
 export class Letterboxd {
     static async getRating(slug: string): Promise<number | null> {
-        if (!/^[a-z0-9-]+$/.test(slug)) return null;
+        if (!/^[a-z0-9-:]+$/.test(slug)) return null;
         let browser;
         try {
             browser = await puppeteer.launch({ args: ['--no-sandbox', '--disable-setuid-sandbox'] });

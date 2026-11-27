@@ -78,12 +78,13 @@ describe('opening slide', () => {
 // ─── Contract: empty result when currentEntries is empty ─────────────────────
 
 describe('empty state (no currentEntries)', () => {
-    it('includes the empty state and backlog changes slide', () => {
+    it('includes the empty state, backlog changes and backlog duration changes slide', () => {
         const slides = buildRecapSlides(2024, [], [], []);
-        expect(slides).toHaveLength(3);
+        expect(slides).toHaveLength(4);
         expect(slides[0].kind).toBe('opening');
         expect(slides[1].kind).toBe('empty');
         expect(slides[2].kind).toBe('backlog_changes');
+        expect(slides[3].kind).toBe('backlog_duration_changes');
     });
 
     it('empty slide carries the year', () => {
@@ -92,10 +93,11 @@ describe('empty state (no currentEntries)', () => {
         expect(empty.year).toBe(2024);
     });
 
-    it('includes backlog changes even when genres exist without finished entries', () => {
+    it('includes backlog changes and backlog duration changes even when genres exist without finished entries', () => {
         const slides = buildRecapSlides(2024, [], [], [{ name: 'RPG', count: 5 }]);
-        expect(slides).toHaveLength(3);
+        expect(slides).toHaveLength(4);
         expect(slides[2].kind).toBe('backlog_changes');
+        expect(slides[3].kind).toBe('backlog_duration_changes');
     });
 });
 
