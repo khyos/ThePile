@@ -38,6 +38,7 @@
     let refreshingAllLinks = false;
     let refreshingLinks: Record<string, boolean> = {};
     let addingLink = false;
+    let editingLink = false;
 
     let addSearchQuery: string = '';
     let addCandidates: Candidate[] = [];
@@ -145,14 +146,17 @@
         openEditLink = true;
     }
 
-    function updateLink() {
-        fetch(`/api/${artifact.type.toLowerCase()}/${artifact.id}/link`, {
-            method: "PATCH",
-            body: JSON.stringify({
-                type: editLinkType,
-                url: editLinkUrl,
-            }),
-        }).then((response) => {
+    async function updateLink() {
+        if (editingLink) return;
+        editingLink = true;
+        try {
+            const response = await fetch(`/api/${artifact.type.toLowerCase()}/${artifact.id}/link`, {
+                method: "PATCH",
+                body: JSON.stringify({
+                    type: editLinkType,
+                    url: editLinkUrl,
+                }),
+            });
             if (response.status !== 200) {
                 alert("Failed to update link");
                 return;
@@ -164,10 +168,12 @@
             editCandidates = [];
             editSearchDone = false;
             editPendingCandidate = null;
-        }).catch(error => {
+        } catch (error) {
             console.error("Error updating link:", error);
             alert("Failed to update link");
-        });
+        } finally {
+            editingLink = false;
+        }
     }
 
     async function removeLink() {
@@ -421,12 +427,13 @@
         <Button
             color="primary"
             onclick={updateLink}
-            disabled={isLinkInputIncomplete(editLinkType, editLinkUrl)}>
-            Edit Link
+            disabled={editingLink || isLinkInputIncomplete(editLinkType, editLinkUrl)}>
+            {#if editingLink}<Spinner size="4" class="mr-1" />{/if}
+            {editingLink ? "Saving..." : "Edit Link"}
         </Button>
         {#if canEdit && editLinkRemovable}
-            <Button color="red" onclick={removeLink}>Remove</Button>
+            <Button color="red" onclick={removeLink} disabled={editingLink}>Remove</Button>
         {/if}
-        <Button color="alternative" onclick={() => (openEditLink = false)}>Cancel</Button>
+        <Button color="alternative" onclick={() => (openEditLink = false)} disabled={editingLink}>Cancel</Button>
     {/snippet}
 </Modal>

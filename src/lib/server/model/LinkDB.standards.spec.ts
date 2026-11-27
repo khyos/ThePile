@@ -62,15 +62,14 @@ describe('LinkDB.getArtifactsMissingLink — implementation-level tests', () => 
         expect(result).toEqual([]);
     });
 
-    it('returns only { id, title } fields — no other artifact columns leak through', async () => {
+    it('returns only the public fields — no raw artifact columns leak through', async () => {
         const id = await ArtifactDB.createArtifact('Field Test', ArtifactType.GAME);
 
         const result = await LinkDB.getArtifactsMissingLink(ArtifactType.GAME, LinkType.IGDB);
 
         expect(result).toHaveLength(1);
-        // Only id and title should be present
         const keys = Object.keys(result[0]).sort();
-        expect(keys).toEqual(['id', 'title']);
+        expect(keys).toEqual(['id', 'title', 'year']);
         expect(result[0].id).toBe(id);
         expect(result[0].title).toBe('Field Test');
     });

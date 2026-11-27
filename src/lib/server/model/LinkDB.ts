@@ -55,9 +55,9 @@ export class LinkDB {
     static async getArtifactsMissingLink(
         artifactType: ArtifactType,
         linkType: LinkType
-    ): Promise<{ id: number; title: string }[]> {
-        return await getDbRows<{ id: number; title: string }>(
-            `SELECT artifact.id, artifact.title
+    ): Promise<{ id: number; title: string; year: number | null }[]> {
+        return await getDbRows<{ id: number; title: string; releaseDate: number | null }>(
+            `SELECT artifact.id, artifact.title, artifact.releaseDate
              FROM artifact
              WHERE artifact.type = ?
                AND artifact.parent_artifact_id IS NULL
@@ -67,7 +67,11 @@ export class LinkDB {
                )
              ORDER BY artifact.title ASC`,
             [artifactType, linkType]
-        );
+        ).then(rows => rows.map(r => ({
+            id: r.id,
+            title: r.title,
+            year: r.releaseDate ? new Date(r.releaseDate).getFullYear() : null,
+        })));
     }
 
     static async createLinkTable() {

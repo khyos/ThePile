@@ -94,8 +94,8 @@ describe('only non-main type entries present', () => {
 describe('backlog changes slide', () => {
     it('shows all five main types and calculates added minus removed even without finished entries', () => {
         const slides = buildRecapSlides(2024, [], [], [], [
-            { type: ArtifactType.GAME, added: 5, removed: 2 },
-            { type: ArtifactType.MOVIE, added: 1, removed: 3 }
+            { type: ArtifactType.GAME, added: 5, removed: 2, addedDuration: 0, removedDuration: 0 },
+            { type: ArtifactType.MOVIE, added: 1, removed: 3, addedDuration: 0, removedDuration: 0 }
         ]);
         const slide = slides.find(s => s.kind === 'backlog_changes') as Extract<RecapSlide, { kind: 'backlog_changes' }>;
 
@@ -108,14 +108,14 @@ describe('backlog changes slide', () => {
             ArtifactType.MANGA
         ]);
         expect(slide.counts.find(c => c.type === ArtifactType.GAME)).toEqual({
-            type: ArtifactType.GAME, added: 5, removed: 2, delta: 3
+            type: ArtifactType.GAME, added: 5, removed: 2, addedDuration: 0, removedDuration: 0, delta: 3
         });
         expect(slide.counts.find(c => c.type === ArtifactType.MOVIE)).toEqual({
-            type: ArtifactType.MOVIE, added: 1, removed: 3, delta: -2
+            type: ArtifactType.MOVIE, added: 1, removed: 3, addedDuration: 0, removedDuration: 0, delta: -2
         });
         for (const type of [ArtifactType.TVSHOW, ArtifactType.ANIME, ArtifactType.MANGA]) {
             expect(slide.counts.find(c => c.type === type)).toEqual({
-                type, added: 0, removed: 0, delta: 0
+                type, added: 0, removed: 0, addedDuration: 0, removedDuration: 0, delta: 0
             });
         }
     });

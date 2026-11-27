@@ -92,12 +92,23 @@ export function buildRecapSlides(
 			const activity = activityByType.get(type);
 			const added = activity?.added ?? 0;
 			const removed = activity?.removed ?? 0;
-			return { type, added, removed, delta: added - removed };
+			const addedDuration = activity?.addedDuration ?? 0;
+			const removedDuration = activity?.removedDuration ?? 0;
+			return { type, added, removed, addedDuration, removedDuration, delta: added - removed };
+		})
+	};
+	const backlogDurationChanges: RecapSlide = {
+		kind: 'backlog_duration_changes',
+		counts: MAIN_ARTIFACT_TYPES.map(type => {
+			const activity = activityByType.get(type);
+			const addedDuration = activity?.addedDuration ?? 0;
+			const removedDuration = activity?.removedDuration ?? 0;
+			return { type, addedDuration, removedDuration, net: addedDuration - removedDuration };
 		})
 	};
 
 	if (currentEntries.length === 0) {
-		return [opening, { kind: 'empty', year }, backlogChanges];
+		return [opening, { kind: 'empty', year }, backlogChanges, backlogDurationChanges];
 	}
 
 	const slides: RecapSlide[] = [opening];
@@ -285,6 +296,7 @@ export function buildRecapSlides(
 
 	// Slide 11: Closing
 	slides.push(backlogChanges);
+	slides.push(backlogDurationChanges);
 	slides.push({ kind: 'closing', totalCount, year });
 
 	return slides;

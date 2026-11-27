@@ -42,6 +42,8 @@ type RawBacklogActivityCount = {
 	type: ArtifactType;
 	added: number;
 	removed: number;
+	addedDuration: number;
+	removedDuration: number;
 };
 
 type RawGenre = {
@@ -78,20 +80,33 @@ export const RecapDB = {
 			        END) AS added,
 			        COUNT(DISTINCT CASE
 			            WHEN user_artifact.endDate >= ? AND user_artifact.endDate <= ? THEN artifact.id
-			        END) AS removed
+			        END) AS removed,
+			        COALESCE(SUM(CASE
+			            WHEN artifact.releaseDate >= ? AND artifact.releaseDate <= ?
+			                 AND artifact.releaseDate != ? THEN artifact.duration ELSE 0
+			        END), 0) AS addedDuration,
+			        COALESCE(SUM(CASE
+			            WHEN user_artifact.endDate >= ? AND user_artifact.endDate <= ? THEN artifact.duration ELSE 0
+			        END), 0) AS removedDuration
 			 FROM user_artifact
 			 JOIN artifact ON artifact.id = user_artifact.artifactId
 			 WHERE user_artifact.userId = ?
 			   AND user_artifact.status IS NOT NULL
 			   AND artifact.type IN (${placeholders})
 			 GROUP BY artifact.type`,
-			[yearStart, yearEnd, RELEASE_DATE_SENTINEL, yearStart, yearEnd, userId, ...MAIN_ARTIFACT_TYPES]
+			[yearStart, yearEnd, RELEASE_DATE_SENTINEL, yearStart, yearEnd, yearStart, yearEnd, RELEASE_DATE_SENTINEL, yearStart, yearEnd, userId, ...MAIN_ARTIFACT_TYPES]
 		);
 
 		const countsByType = new Map(rows.map(row => [row.type, row]));
 		return MAIN_ARTIFACT_TYPES.map(type => {
 			const counts = countsByType.get(type);
-			return { type, added: counts?.added ?? 0, removed: counts?.removed ?? 0 };
+			return {
+				type,
+				added: counts?.added ?? 0,
+				removed: counts?.removed ?? 0,
+				addedDuration: counts?.addedDuration ?? 0,
+				removedDuration: counts?.removedDuration ?? 0
+			};
 		});
 	},
 

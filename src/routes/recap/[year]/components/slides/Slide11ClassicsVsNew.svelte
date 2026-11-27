@@ -35,9 +35,10 @@
                 <p class="text-white/40 text-xs mt-1">{classicPct}%</p>
             </div>
             <div class="bg-sky-400/20 rounded-2xl p-5">
-                <p class="text-sky-300 text-xs uppercase tracking-wider mb-2">Recent</p>
+                <p class="text-sky-300 text-xs uppercase tracking-wider">Recent</p>
                 <p class="text-white text-4xl font-black">{recentCount}</p>
-                <p class="text-white/40 text-xs mt-1">{recentPct}%</p>
+                <p class="text-white/40 text-xs mt-1 mb-2">{recentPct}%</p>
+                <p class="text-sky-300 text-xs tracking-wider">(last 10 years)</p>
             </div>
             <div class="bg-amber-400/20 rounded-2xl p-5">
                 <p class="text-amber-300 text-xs uppercase tracking-wider mb-2">New releases</p>

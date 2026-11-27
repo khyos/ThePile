@@ -57,13 +57,13 @@ describe('RecapDB.getYearBacklogActivity', () => {
 
 		const counts = await RecapDB.getYearBacklogActivity(1, yearStart, yearEnd);
 		expect(counts.find(c => c.type === ArtifactType.GAME)).toEqual({
-			type: ArtifactType.GAME, added: 1, removed: 0
+			type: ArtifactType.GAME, added: 1, removed: 0, addedDuration: 0, removedDuration: 0
 		});
 		expect(counts.find(c => c.type === ArtifactType.MOVIE)).toEqual({
-			type: ArtifactType.MOVIE, added: 1, removed: 0
+			type: ArtifactType.MOVIE, added: 1, removed: 0, addedDuration: 0, removedDuration: 0
 		});
 		expect(counts.find(c => c.type === ArtifactType.TVSHOW)).toEqual({
-			type: ArtifactType.TVSHOW, added: 0, removed: 1
+			type: ArtifactType.TVSHOW, added: 0, removed: 1, addedDuration: 0, removedDuration: 0
 		});
 		expect(counts.find(c => c.type === ArtifactType.ANIME)?.added).toBe(0);
 		expect(counts.find(c => c.type === ArtifactType.MANGA)?.added).toBe(0);
@@ -84,13 +84,13 @@ describe('RecapDB.getYearBacklogActivity', () => {
 		const counts = await RecapDB.getYearBacklogActivity(1, yearStart, yearEnd);
 
 		expect(counts.find(c => c.type === ArtifactType.GAME)).toEqual({
-			type: ArtifactType.GAME, added: 1, removed: 1
+			type: ArtifactType.GAME, added: 1, removed: 1, addedDuration: 0, removedDuration: 0
 		});
 		expect(counts.find(c => c.type === ArtifactType.MOVIE)).toEqual({
-			type: ArtifactType.MOVIE, added: 0, removed: 0
+			type: ArtifactType.MOVIE, added: 0, removed: 0, addedDuration: 0, removedDuration: 0
 		});
 		expect(counts.find(c => c.type === ArtifactType.ANIME)).toEqual({
-			type: ArtifactType.ANIME, added: 1, removed: 1
+			type: ArtifactType.ANIME, added: 1, removed: 1, addedDuration: 0, removedDuration: 0
 		});
 	});
 
@@ -103,7 +103,7 @@ describe('RecapDB.getYearBacklogActivity', () => {
 
 		const counts = await RecapDB.getYearBacklogActivity(1, yearStart, yearEnd);
 		expect(counts.find(c => c.type === ArtifactType.GAME)).toEqual({
-			type: ArtifactType.GAME, added: 1, removed: 1
+			type: ArtifactType.GAME, added: 1, removed: 1, addedDuration: 0, removedDuration: 0
 		});
 	});
 
@@ -142,7 +142,7 @@ describe('RecapDB.getYearBacklogActivity', () => {
 		expect(counts.every(c => typeof c.added === 'number' && typeof c.removed === 'number')).toBe(true);
 		expect(counts.find(c => c.type === ArtifactType.GAME)?.added).toBe(1);
 		expect(counts.find(c => c.type === ArtifactType.MOVIE)).toEqual({
-			type: ArtifactType.MOVIE, added: 0, removed: 0
+			type: ArtifactType.MOVIE, added: 0, removed: 0, addedDuration: 0, removedDuration: 0
 		});
 	});
 });
