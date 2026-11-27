@@ -178,7 +178,7 @@ export class GameDB {
         );
     }
 
-    static async updateDuration(gameId: number, duration: number): Promise<void> {
+    static async updateDuration(gameId: number, duration: number | null): Promise<void> {
         await runDbQuery(`UPDATE artifact SET duration = ? WHERE id = ?`, [duration, gameId]);
     }
 

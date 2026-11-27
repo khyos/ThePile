@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getLinkTypeLabel, getLinkTypesByArtifactType, Link, LinkType } from "#lib/model/Link";
+    import { getLinkTypeLabel, getLinkTypesByArtifactType, isLinkTypeRemovable, Link, LinkType } from "#lib/model/Link";
     import { ArtifactType } from "#lib/model/Artifact";
     import type { Candidate } from "#lib/model/Candidate";
     import { openLink } from "#lib/services/LinkService";
@@ -25,6 +25,7 @@
 
     $: artifactItemStoreInst = $artifactItemStore;
     $: artifact = artifactItemStoreInst.artifact;
+    $: editLinkRemovable = editLinkType != null && isLinkTypeRemovable(artifact.type, editLinkType);
 
     let openAddLink = false;
     let openEditLink = false;
@@ -169,8 +170,31 @@
         });
     }
 
-    async function searchCandidates(modal: 'add' | 'edit') {
-        const linkType = modal === 'add' ? addLinkType : editLinkType;
+    async function removeLink() {
+        if (!editLinkType) return;
+        if (!confirm(`Are you sure you want to remove the ${getLinkTypeLabel(editLinkType)} link and its derived data?`)) {
+            return;
+        }
+        try {
+            const response = await fetch(`/api/${artifact.type.toLowerCase()}/${artifact.id}/link?type=${editLinkType}`, {
+                method: "DELETE",
+            });
+            if (response.status !== 200) {
+                alert("Failed to remove link");
+                return;
+            }
+            refreshArtifact();
+            refreshLinkTypes();
+            openEditLink = false;
+            editLinkType = null;
+            editLinkUrl = undefined;
+        } catch (error) {
+            console.error("Error removing link:", error);
+            alert("Failed to remove link");
+        }
+    }
+
+    async function searchCandidates(modal: 'add' | 'edit') {        const linkType = modal === 'add' ? addLinkType : editLinkType;
         const query = modal === 'add' ? addSearchQuery : editSearchQuery;
         if (!linkType || !query) return;
 
@@ -400,6 +424,9 @@
             disabled={isLinkInputIncomplete(editLinkType, editLinkUrl)}>
             Edit Link
         </Button>
+        {#if canEdit && editLinkRemovable}
+            <Button color="red" onclick={removeLink}>Remove</Button>
+        {/if}
         <Button color="alternative" onclick={() => (openEditLink = false)}>Cancel</Button>
     {/snippet}
 </Modal>

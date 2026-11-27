@@ -2,7 +2,8 @@ import { HLTB } from "#lib/hltb/HLTB";
 import { IGDB, IGDB_STATUS, IGDB_RELEASE_DATE_STATUS } from "#lib/igdb/IGDB";
 import { ITAD } from "#lib/itad/ITAD";
 import { MetaCritic } from "#lib/metacritic/MetaCritic";
-import { LinkType } from "#lib/model/Link";
+import { ArtifactType } from "#lib/model/Artifact";
+import { isLinkTypeRemovable, LinkType } from "#lib/model/Link";
 import { RatingType } from "#lib/model/Rating";
 import { User, UserRights } from "#lib/model/User";
 import { OpenCritic } from "#lib/opencritic/OpenCritic";
@@ -176,4 +177,37 @@ export async function PUT({ params, request, locals }: RequestEvent) {
         }
     }
     return json({ success: true });
+}
+
+export async function DELETE({ params, url, locals }: RequestEvent) {
+    const user = User.deserialize(locals.user);
+    if (!user.hasRight(UserRights.EDIT_ARTIFACT)) {
+        return error(403, "Forbidden");
+    }
+    const gameId = parseInt(params.slug);
+    const type = url.searchParams.get("type") as LinkType | null;
+    if (!type || !isLinkTypeRemovable(ArtifactType.GAME, type)) {
+        return error(400, "Invalid link type");
+    }
+
+    await cleanupLinkData(gameId, type);
+    await LinkDB.deleteLink(gameId, type);
+    return json({ success: true });
+}
+
+const cleanupLinkData = async (gameId: number, type: LinkType): Promise<void> => {
+    if (type === LinkType.HLTB) {
+        await GameDB.updateDuration(gameId, null);
+    } else if (type === LinkType.SENSCRITIQUE) {
+        await RatingDB.deleteRating(gameId, RatingType.SENSCRITIQUE);
+    } else if (type === LinkType.METACRITIC) {
+        await RatingDB.deleteRating(gameId, RatingType.METACRITIC);
+    } else if (type === LinkType.OPENCRITIC) {
+        await RatingDB.deleteRating(gameId, RatingType.OPENCRITIC);
+    } else if (type === LinkType.STEAM) {
+        await RatingDB.deleteRating(gameId, RatingType.STEAM);
+    } else if (type === LinkType.ITAD) {
+        const allServices = await SubscriptionServiceDB.getAllServices();
+        await SubscriptionServiceDB.syncArtifactSubscriptions(gameId, [], allServices);
+    }
 }

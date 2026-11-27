@@ -1,5 +1,6 @@
 import { MAL } from "#lib/mal/MAL";
-import { LinkType } from "#lib/model/Link";
+import { ArtifactType } from "#lib/model/Artifact";
+import { isLinkTypeRemovable, LinkType } from "#lib/model/Link";
 import { RatingType } from "#lib/model/Rating";
 import { User, UserRights } from "#lib/model/User";
 import { SensCritique } from "#lib/senscritique/SensCritique";
@@ -79,6 +80,28 @@ export async function PUT({ params, request, locals }: RequestEvent) {
         }
     }
     return json({ success: true });
+}
+
+export async function DELETE({ params, url, locals }: RequestEvent) {
+    const user = User.deserialize(locals.user);
+    if (!user.hasRight(UserRights.EDIT_ARTIFACT)) {
+        return error(403, "Forbidden");
+    }
+    const animeId = parseInt(params.slug);
+    const type = url.searchParams.get("type") as LinkType | null;
+    if (!type || !isLinkTypeRemovable(ArtifactType.ANIME, type)) {
+        return error(400, "Invalid link type");
+    }
+
+    await cleanupLinkData(animeId, type);
+    await LinkDB.deleteLink(animeId, type);
+    return json({ success: true });
+}
+
+const cleanupLinkData = async (animeId: number, type: LinkType): Promise<void> => {
+    if (type === LinkType.SENSCRITIQUE) {
+        await RatingDB.deleteRating(animeId, RatingType.SENSCRITIQUE);
+    }
 }
 
 const updateMAL = async (animeId: number, malId: string) => {
