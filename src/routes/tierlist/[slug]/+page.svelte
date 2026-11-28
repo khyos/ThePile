@@ -6,8 +6,10 @@
     import TierRow from "./components/TierRow.svelte";
     import UnrankedPool from "./components/UnrankedPool.svelte";
     import TierEditor from "./components/TierEditor.svelte";
+    import TierListTagEditor from "./components/TierListTagEditor.svelte";
     import AddItemModal from "./components/AddItemModal.svelte";
     import type { TierId } from "./components/dnd";
+    import type { TierListItem } from "#lib/model/TierListItem";
     import type { IArtifactSummary } from "#lib/server/model/TierListUtil";
 
     export let data: PageData;
@@ -18,17 +20,36 @@
 
     let showEditor = false;
     let showAddItemModal = false;
+    let filterTagId: number | null = null;
     let boardEl: HTMLElement;
     let unrankedEl: HTMLElement;
     let addedSummaries: IArtifactSummary[] = [];
     let removalCandidates: IArtifactSummary[] = [];
+    let tagChangeError = '';
+    let moveError = '';
 
     const onDropItem = async (artifactId: number, _sourceTierId: TierId, targetTierId: TierId, targetPosition: number) => {
-        await fetch(`/api/tierlist/${store.tierList.id}/move`, {
-            method: "POST",
-            body: JSON.stringify({ artifactId, targetTierId, targetPosition })
-        });
-        await refreshTierList();
+        try {
+            const response = await fetch(`/api/tierlist/${store.tierList.id}/move`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ artifactId, targetTierId, targetPosition })
+            });
+            if (!response.ok) {
+                moveError = 'Unable to move this item. Please try again.';
+                return;
+            }
+        } catch {
+            moveError = 'Unable to move this item. Please try again.';
+            return;
+        }
+
+        moveError = '';
+        try {
+            await refreshTierList();
+        } catch {
+            moveError = 'Item moved, but the list could not be refreshed.';
+        }
     };
 
     const patchTiers = async (tiers: { id?: number; label: string; color: string; position: number }[]) => {
@@ -40,6 +61,52 @@
             return;
         }
         await refreshTierList();
+    };
+
+    const createTag = async (name: string, color: string) => {
+        const response = await fetch(`/api/tierlist/${store.tierList.id}/tag`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, color })
+        });
+        if (!response.ok) {
+            throw new Error('Unable to create tag');
+        }
+        await refreshTierList();
+    };
+
+    const onTagChange = async (artifactId: number, tagId: number, assigned: boolean): Promise<boolean> => {
+        let response: Response;
+        try {
+            response = await fetch(`/api/tierlist/${store.tierList.id}/tag`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ artifactId, tagId, assigned })
+            });
+        } catch {
+            tagChangeError = 'Unable to update this tag. Please try again.';
+            return false;
+        }
+        if (!response.ok) {
+            tagChangeError = 'Unable to update this tag. Please try again.';
+            return false;
+        }
+        tagChangeError = '';
+        try {
+            await refreshTierList();
+        } catch {
+            tagChangeError = 'Tag updated, but the list could not be refreshed.';
+        }
+        return true;
+    };
+
+    const filterItems = (items: TierListItem[]): TierListItem[] => filterTagId === null
+        ? items
+        : items.filter(item => item.tags.some(tag => tag.id === filterTagId));
+
+    const onTagFilterChange = (event: Event) => {
+        const value = (event.currentTarget as HTMLSelectElement).value;
+        filterTagId = value === '' ? null : Number(value);
     };
 
     const onUpdateTier = async (tierId: number, label: string, color: string) => {
@@ -120,7 +187,7 @@
         <h1 class="text-2xl font-extrabold dark:text-white">{store.tierList.title}</h1>
         {#if data.canEdit}
             <div class="flex gap-2">
-                <Button size="sm" color="light" onclick={() => (showEditor = !showEditor)}>Edit tiers</Button>
+                <Button size="sm" color="light" onclick={() => (showEditor = !showEditor)}>Edit tiers &amp; tags</Button>
                 {#if !store.tierList.isStandalone}
                     <Button size="sm" color="light" onclick={refreshFromBacklog}>Refresh from backlog</Button>
                     <Button size="sm" color="primary" onclick={unlinkFromBacklog}>Unlink from backlog</Button>
@@ -135,6 +202,31 @@
 
     {#if data.canEdit && showEditor}
         <TierEditor tiers={store.tierList.tiers} onSave={onSaveTiers} />
+        <TierListTagEditor tags={store.tierList.tags} onCreate={createTag} />
+    {/if}
+
+    <div class="flex flex-wrap items-center gap-2">
+        <label for="tier-list-tag-filter" class="text-sm dark:text-white">Filter by tag</label>
+        <select
+            id="tier-list-tag-filter"
+            class="rounded border border-gray-300 bg-white px-2 py-1 text-sm dark:bg-gray-800 dark:text-white"
+            value={filterTagId ?? ''}
+            onchange={onTagFilterChange}
+        >
+            <option value="">All items</option>
+            {#each store.tierList.tags as tag (tag.id)}
+                <option value={tag.id}>{tag.name}</option>
+            {/each}
+        </select>
+        {#if filterTagId !== null}
+            <span class="text-sm text-gray-500 dark:text-gray-400">Reordering is disabled while filtering.</span>
+        {/if}
+    </div>
+    {#if tagChangeError}
+        <p class="text-sm text-red-600 dark:text-red-400" role="alert">{tagChangeError}</p>
+    {/if}
+    {#if moveError}
+        <p class="text-sm text-red-600 dark:text-red-400" role="alert">{moveError}</p>
     {/if}
 
     {#if data.canEdit && (addedSummaries.length > 0 || removalCandidates.length > 0)}
@@ -158,20 +250,27 @@
         {#each store.tierList.tiers as tier (tier.id)}
             <TierRow
                 {tier}
+                items={filterItems(tier.items)}
                 artifactType={store.tierList.artifactType}
                 canEdit={data.canEdit}
+                canReorder={data.canEdit && filterTagId === null}
                 onDrop={onDropItem}
                 {onUpdateTier}
                 onRemove={store.tierList.isStandalone && data.canEdit ? removeItem : undefined}
+                tagDefinitions={store.tierList.tags}
+                onTagChange={data.canEdit ? onTagChange : undefined}
             />
         {/each}
         <div bind:this={unrankedEl}>
             <UnrankedPool
-                items={store.tierList.unranked}
+                items={filterItems(store.tierList.unranked)}
                 artifactType={store.tierList.artifactType}
                 canEdit={data.canEdit}
+                canReorder={data.canEdit && filterTagId === null}
                 onDrop={onDropItem}
                 onRemove={store.tierList.isStandalone && data.canEdit ? removeItem : undefined}
+                tagDefinitions={store.tierList.tags}
+                onTagChange={data.canEdit ? onTagChange : undefined}
             />
         </div>
     </div>

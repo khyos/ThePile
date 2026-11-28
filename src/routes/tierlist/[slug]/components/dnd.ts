@@ -73,18 +73,14 @@ function markIndicator(node: HTMLElement, className: string) {
 }
 
 export function draggable(node: HTMLElement, options: DraggableOptions) {
-    if (!options.canEdit) {
-        return;
-    }
     let state = {
         artifactId: options.artifactId,
         sourceTierId: options.sourceTierId,
         sourceIndex: options.sourceIndex
     };
-
-    node.draggable = true;
-    node.style.touchAction = 'pan-y';
-    node.style.cursor = 'grab';
+    const originalTouchAction = node.style.touchAction;
+    const originalCursor = node.style.cursor;
+    let enabled = false;
 
     const handleDragStart = (e: DragEvent) => {
         if (e.dataTransfer) {
@@ -94,8 +90,25 @@ export function draggable(node: HTMLElement, options: DraggableOptions) {
     const handleDragEnd = () => {
         clearIndicators();
     };
-    node.addEventListener('dragstart', handleDragStart);
-    node.addEventListener('dragend', handleDragEnd);
+
+    const setEnabled = (canEdit: boolean) => {
+        if (canEdit === enabled) return;
+        enabled = canEdit;
+        node.draggable = enabled;
+        if (enabled) {
+            node.style.touchAction = 'pan-y';
+            node.style.cursor = 'grab';
+            node.addEventListener('dragstart', handleDragStart);
+            node.addEventListener('dragend', handleDragEnd);
+        } else {
+            node.removeEventListener('dragstart', handleDragStart);
+            node.removeEventListener('dragend', handleDragEnd);
+            node.style.touchAction = originalTouchAction;
+            node.style.cursor = originalCursor;
+        }
+    };
+
+    setEnabled(options.canEdit);
 
     return {
         update(options: DraggableOptions) {
@@ -103,24 +116,22 @@ export function draggable(node: HTMLElement, options: DraggableOptions) {
                 artifactId: options.artifactId,
                 sourceTierId: options.sourceTierId,
                 sourceIndex: options.sourceIndex
-            }
+            };
+            setEnabled(options.canEdit);
         },
         destroy() {
-            node.removeEventListener('dragstart', handleDragStart);
-            node.removeEventListener('dragend', handleDragEnd);
+            setEnabled(false);
         }
     }
 }
 
 export function dropzone(node: HTMLElement, options: DropzoneOptions) {
-    if (!options.canEdit) {
-        return;
-    }
     let state: DropzoneState = {
         dropEffect: 'move',
         dragOverClass: 'droppable',
         ...options
     }
+    let enabled = false;
 
     const indicatorClassFor = (e: DragEvent, target: HTMLElement): string => {
         if (state.itemArtifactId !== undefined && state.horizontal) {
@@ -187,10 +198,25 @@ export function dropzone(node: HTMLElement, options: DropzoneOptions) {
         state.onDrop(srcData.artifactId, srcData.sourceTierId, state.tierId, targetPosition);
     };
 
-    node.addEventListener('dragenter', handleDragEnter);
-    node.addEventListener('dragleave', handleDragLeave);
-    node.addEventListener('dragover', handleDragOver);
-    node.addEventListener('drop', handleDrop);
+    const setEnabled = (canEdit: boolean) => {
+        if (canEdit === enabled) return;
+        enabled = canEdit;
+        if (enabled) {
+            node.addEventListener('dragenter', handleDragEnter);
+            node.addEventListener('dragleave', handleDragLeave);
+            node.addEventListener('dragover', handleDragOver);
+            node.addEventListener('drop', handleDrop);
+        } else {
+            node.removeEventListener('dragenter', handleDragEnter);
+            node.removeEventListener('dragleave', handleDragLeave);
+            node.removeEventListener('dragover', handleDragOver);
+            node.removeEventListener('drop', handleDrop);
+            node.classList.remove(state.dragOverClass);
+            clearIndicators();
+        }
+    };
+
+    setEnabled(options.canEdit);
 
     return {
         update(options: DropzoneOptions) {
@@ -198,12 +224,10 @@ export function dropzone(node: HTMLElement, options: DropzoneOptions) {
                 ...state,
                 ...options
             };
+            setEnabled(options.canEdit);
         },
         destroy() {
-            node.removeEventListener('dragenter', handleDragEnter);
-            node.removeEventListener('dragleave', handleDragLeave);
-            node.removeEventListener('dragover', handleDragOver);
-            node.removeEventListener('drop', handleDrop);
+            setEnabled(false);
         }
     };
 }

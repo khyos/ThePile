@@ -5,9 +5,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  *
  * These exercise the branches that are only visible by reading +server.ts, with
  * TierListDB + User mocked so no database is touched:
- *   - `parseInt(params.slug)` is forwarded as the tier-list id
- *   - the `targetTierId ?? null` coalescing (undefined OR null body value => Unranked pool),
- *     while a real tier id (including 0) is forwarded unchanged
+ *   - complete slug/body validation
+ *   - the `targetTierId ?? null` coalescing for the Unranked pool
  *   - the authorization gate short-circuits (non-200 => no moveItem call)
  *   - a throwing moveItem is mapped to a 500 error
  *   - the happy path returns { success: true }
@@ -29,10 +28,18 @@ import { TierListDB } from '#lib/server/model/TierListDB';
 
 const OK = { status: 200, message: 'OK' };
 
-function makeEvent(slug: string, body: Record<string, unknown>) {
+function makeEvent(slug: string, body: unknown) {
     return {
         params: { slug },
         request: { json: vi.fn().mockResolvedValue(body) },
+        locals: { user: { id: 1 } }
+    } as never;
+}
+
+function makeMalformedJsonEvent() {
+    return {
+        params: { slug: '42' },
+        request: { json: vi.fn().mockRejectedValue(new SyntaxError('Unexpected token')) },
         locals: { user: { id: 1 } }
     } as never;
 }
@@ -50,7 +57,7 @@ describe('move endpoint - targetTierId coalescing', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.mocked(TierListDB.canEditTierList).mockResolvedValue(OK as never);
-        vi.mocked(TierListDB.moveItem).mockResolvedValue(undefined);
+        vi.mocked(TierListDB.moveItem).mockResolvedValue('moved');
     });
 
     it('coalesces an undefined targetTierId to null (Unranked pool)', async () => {
@@ -63,14 +70,9 @@ describe('move endpoint - targetTierId coalescing', () => {
         expect(TierListDB.moveItem).toHaveBeenCalledWith(42, 7, null, 0);
     });
 
-    it('forwards a real tier id unchanged', async () => {
+    it('forwards a real tier id to moveItem without pre-validating the destination', async () => {
         await POST(makeEvent('99', { artifactId: 7, targetTierId: 5, targetPosition: 3 }));
         expect(TierListDB.moveItem).toHaveBeenCalledWith(99, 7, 5, 3);
-    });
-
-    it('forwards tier id 0 unchanged (not coalesced to null)', async () => {
-        await POST(makeEvent('99', { artifactId: 7, targetTierId: 0, targetPosition: 1 }));
-        expect(TierListDB.moveItem).toHaveBeenCalledWith(99, 7, 0, 1);
     });
 
     it('returns { success: true } on the happy path', async () => {
@@ -82,7 +84,8 @@ describe('move endpoint - targetTierId coalescing', () => {
 describe('move endpoint - gates and error handling', () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        vi.mocked(TierListDB.moveItem).mockResolvedValue(undefined);
+        vi.mocked(TierListDB.canEditTierList).mockResolvedValue(OK as never);
+        vi.mocked(TierListDB.moveItem).mockResolvedValue('moved');
     });
 
     it('short-circuits with the authorization status and never calls moveItem', async () => {
@@ -96,9 +99,44 @@ describe('move endpoint - gates and error handling', () => {
         expect(await statusOf(POST(makeEvent('42', { artifactId: 7, targetPosition: 0 })))).toBe(404);
     });
 
+    it.each(['', '0', '42.5', '42x', '9'.repeat(400)])('rejects malformed or non-positive slug %s', async (slug) => {
+        expect(await statusOf(POST(makeEvent(slug, { artifactId: 7, targetPosition: 0 })))).toBe(400);
+        expect(TierListDB.canEditTierList).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 for malformed JSON', async () => {
+        expect(await statusOf(POST(makeMalformedJsonEvent()))).toBe(400);
+        expect(TierListDB.moveItem).not.toHaveBeenCalled();
+    });
+
+    it.each([
+        null,
+        [],
+        42,
+        {},
+        { artifactId: '7', targetPosition: 0 },
+        { artifactId: 7, targetPosition: -1 },
+        { artifactId: 7, targetPosition: 0.5 },
+        { artifactId: 7, targetTierId: '5', targetPosition: 0 },
+        { artifactId: 7, targetTierId: 0, targetPosition: 0 },
+        { artifactId: 7, targetPosition: 0, extra: true }
+    ])('returns 400 for invalid move body %#', async (body) => {
+        expect(await statusOf(POST(makeEvent('42', body)))).toBe(400);
+        expect(TierListDB.moveItem).not.toHaveBeenCalled();
+    });
+
     it('maps a throwing moveItem to a 500 error', async () => {
-        vi.mocked(TierListDB.canEditTierList).mockResolvedValue(OK as never);
         vi.mocked(TierListDB.moveItem).mockRejectedValue(new Error('boom'));
         expect(await statusOf(POST(makeEvent('42', { artifactId: 7, targetPosition: 0 })))).toBe(500);
+    });
+
+    it.each([
+        ['not-found', 404],
+        ['invalid-position', 400]
+    ])('maps a %s move result to %i instead of claiming success', async (moveResult, expectedStatus) => {
+        vi.mocked(TierListDB.moveItem).mockResolvedValue(moveResult as never);
+
+        expect(await statusOf(POST(makeEvent('42', { artifactId: 7, targetPosition: 0 })))).toBe(expectedStatus);
+        expect(TierListDB.moveItem).toHaveBeenCalledWith(42, 7, null, 0);
     });
 });

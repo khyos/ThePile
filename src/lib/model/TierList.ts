@@ -2,6 +2,7 @@ import { ArtifactType } from "./Artifact";
 import type { ISerializable, Serializable } from "./Serializable";
 import { Tier, type ITier } from "./Tier";
 import { TierListItem, type ITierListItem } from "./TierListItem";
+import { TierListTag, type ITierListTag } from "./TierListTag";
 
 export const SERIALIZE_TYPE = 'TierList';
 
@@ -14,6 +15,7 @@ export interface ITierList extends ISerializable {
     isStandalone: boolean;
     tiers: ITier[];
     unranked: ITierListItem[];
+    tags: ITierListTag[];
 }
 
 export class TierList implements Serializable<ITierList> {
@@ -25,6 +27,7 @@ export class TierList implements Serializable<ITierList> {
     isStandalone: boolean;
     tiers: Tier[];
     unranked: TierListItem[];
+    tags: TierListTag[];
 
     constructor(
         id: number,
@@ -34,7 +37,8 @@ export class TierList implements Serializable<ITierList> {
         title: string,
         isStandalone: boolean = false,
         tiers: Tier[] = [],
-        unranked: TierListItem[] = []
+        unranked: TierListItem[] = [],
+        tags: TierListTag[] = []
     ) {
         this.id = id;
         this.userId = userId;
@@ -44,6 +48,7 @@ export class TierList implements Serializable<ITierList> {
         this.isStandalone = isStandalone;
         this.tiers = tiers;
         this.unranked = unranked;
+        this.tags = tags;
     }
 
     toJSON(): ITierList {
@@ -57,6 +62,7 @@ export class TierList implements Serializable<ITierList> {
             isStandalone: this.isStandalone,
             tiers: this.tiers.map(tier => tier.toJSON()),
             unranked: this.unranked.map(item => item.toJSON()),
+            tags: this.tags.map(tag => tag.toJSON()),
         };
     }
 
@@ -72,7 +78,8 @@ export class TierList implements Serializable<ITierList> {
             json.title,
             json.isStandalone,
             json.tiers.map(tier => Tier.fromJSON(tier)),
-            json.unranked.map(item => TierListItem.fromJSON(item))
+            json.unranked.map(item => TierListItem.fromJSON(item)),
+            (json.tags ?? []).map(tag => TierListTag.fromJSON(tag))
         );
     }
 }

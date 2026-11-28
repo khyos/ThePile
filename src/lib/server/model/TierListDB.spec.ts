@@ -47,6 +47,8 @@ describe('TierListDB (live DB)', () => {
 
     const cleanTierTables = async () => {
         await runDbQueries([
+            { query: 'DELETE FROM tier_list_item_tag' },
+            { query: 'DELETE FROM tier_list_tag' },
             { query: 'DELETE FROM tier_list_item' },
             { query: 'DELETE FROM tier_list_tier' },
             { query: 'DELETE FROM tier_list' },
@@ -172,12 +174,74 @@ describe('TierListDB (live DB)', () => {
             expect(unranked.map(r => r.artifactId)).toEqual([ART[2]]);
         });
 
-        test('moving a non-existent item is a no-op (early return on missing row)', async () => {
+        test('rejects a move when the source item is missing', async () => {
             const { tierListId, tierA } = await seedList();
             await TierListDB.insertItem(tierListId, ART[0], tierA, 0);
-            await expect(TierListDB.moveItem(tierListId, 999999, tierA, 0)).resolves.toBeUndefined();
+            await expect(TierListDB.moveItem(tierListId, 999999, tierA, 0)).resolves.toBe('not-found');
             const rows = await readPositions(tierListId, tierA);
-            expect(rows.map(r => r.artifactId)).toEqual([ART[0]]);
+            expect(rows).toEqual([{ artifactId: ART[0], position: 0 }]);
+        });
+
+        test('rejects a move to a tier owned by another tier list', async () => {
+            const { tierListId, tierA } = await seedList();
+            const otherListId = await TierListDB.insertTierList(ownerId, null, ArtifactType.GAME, 'Other list');
+            const foreignTier = await TierListDB.insertTier(otherListId, 'Foreign', '#000', 0);
+            await TierListDB.insertItem(tierListId, ART[0], tierA, 0);
+            await TierListDB.insertItem(otherListId, ART[1], foreignTier, 0);
+
+            await expect(TierListDB.moveItem(tierListId, ART[0], foreignTier, 0)).resolves.toBe('not-found');
+
+            expect(await readPositions(tierListId, tierA)).toEqual([{ artifactId: ART[0], position: 0 }]);
+            expect(await readPositions(otherListId, foreignTier)).toEqual([{ artifactId: ART[1], position: 0 }]);
+        });
+
+        test('rejects a target position beyond the destination tier bounds', async () => {
+            const { tierListId, tierA, tierB } = await seedList();
+            await TierListDB.insertItem(tierListId, ART[0], tierA, 0);
+            await TierListDB.insertItem(tierListId, ART[1], tierB, 0);
+            await TierListDB.insertItem(tierListId, ART[2], tierB, 1);
+
+            // A cross-tier move can be inserted at positions 0..2; 3 is out of range.
+            await expect(TierListDB.moveItem(tierListId, ART[0], tierB, 3)).resolves.toBe('invalid-position');
+
+            expect(await readPositions(tierListId, tierA)).toEqual([{ artifactId: ART[0], position: 0 }]);
+            expect(await readPositions(tierListId, tierB)).toEqual([
+                { artifactId: ART[1], position: 0 },
+                { artifactId: ART[2], position: 1 }
+            ]);
+        });
+
+        test('rolls back source and destination positions when the database fails during a move', async () => {
+            const { tierListId, tierA, tierB } = await seedList();
+            await TierListDB.insertItem(tierListId, ART[0], tierA, 0);
+            await TierListDB.insertItem(tierListId, ART[1], tierA, 1);
+            await TierListDB.insertItem(tierListId, ART[2], tierB, 0);
+            await TierListDB.insertItem(tierListId, ART[3], tierB, 1);
+
+            const triggerName = 'fail_tier_list_move_destination';
+            await runDbQuery(`DROP TRIGGER IF EXISTS ${triggerName}`);
+            await runDbQuery(
+                `CREATE TRIGGER ${triggerName}
+                 BEFORE UPDATE OF position ON tier_list_item
+                 WHEN NEW.tierId = ${tierB}
+                 BEGIN
+                     SELECT RAISE(ABORT, 'injected move failure');
+                 END`
+            );
+
+            try {
+                await expect(TierListDB.moveItem(tierListId, ART[0], tierB, 1)).rejects.toThrow();
+                expect(await readPositions(tierListId, tierA)).toEqual([
+                    { artifactId: ART[0], position: 0 },
+                    { artifactId: ART[1], position: 1 }
+                ]);
+                expect(await readPositions(tierListId, tierB)).toEqual([
+                    { artifactId: ART[2], position: 0 },
+                    { artifactId: ART[3], position: 1 }
+                ]);
+            } finally {
+                await runDbQuery(`DROP TRIGGER IF EXISTS ${triggerName}`);
+            }
         });
     });
 
@@ -349,6 +413,78 @@ describe('TierListDB (live DB)', () => {
             const owner = new User(ownerId, 'tl_owner', UserRole.USER);
             const status = await TierListDB.canEditTierList(owner, 987654);
             expect(status.status).toBe(404);
+        });
+    });
+
+    describe('tier-list tag persistence and assignment isolation', () => {
+        test('creates tags and hydrates definitions and item assignments through TierList', async () => {
+            const { tierListId, tierA } = await seedList();
+            await TierListDB.insertItem(tierListId, ART[0], tierA, 0);
+            const favorite = await TierListDB.createTag(tierListId, 'Favorites', '#5b7cfa');
+
+            expect(await TierListDB.getTags(tierListId)).toEqual([favorite]);
+            expect(await TierListDB.updateItemTag(tierListId, ART[0], favorite.id, true)).toBe(true);
+
+            const hydrated = await TierListDB.getTierListByIdWithItems(tierListId);
+            expect(hydrated!.tags.map(tag => tag.id)).toEqual([favorite.id]);
+            expect(hydrated!.tiers[0].items[0].tags.map(tag => tag.id)).toEqual([favorite.id]);
+        });
+
+        test('persists duplicate assignment as one assignment and removal leaves no row', async () => {
+            const { tierListId, tierA } = await seedList();
+            await TierListDB.insertItem(tierListId, ART[0], tierA, 0);
+            const tag = await TierListDB.createTag(tierListId, 'Replay', '#00aa55');
+
+            expect(await TierListDB.updateItemTag(tierListId, ART[0], tag.id, true)).toBe(true);
+            expect(await TierListDB.updateItemTag(tierListId, ART[0], tag.id, true)).toBe(true);
+            expect(await getDbRows(`SELECT * FROM tier_list_item_tag WHERE tierListId = ? AND artifactId = ?`, [tierListId, ART[0]]))
+                .toHaveLength(1);
+
+            expect(await TierListDB.updateItemTag(tierListId, ART[0], tag.id, false)).toBe(true);
+            expect(await getDbRows(`SELECT * FROM tier_list_item_tag WHERE tierListId = ? AND artifactId = ?`, [tierListId, ART[0]]))
+                .toHaveLength(0);
+        });
+
+        test('does not leak an artifact assignment between different tier lists', async () => {
+            const firstId = await TierListDB.insertTierList(ownerId, null, ArtifactType.GAME, 'First');
+            const secondId = await TierListDB.insertTierList(ownerId, null, ArtifactType.GAME, 'Second');
+            await TierListDB.insertItem(firstId, ART[0], null, 0);
+            await TierListDB.insertItem(secondId, ART[0], null, 0);
+            const tag = await TierListDB.createTag(firstId, 'Only first', '#111111');
+
+            await TierListDB.updateItemTag(firstId, ART[0], tag.id, true);
+
+            const first = await TierListDB.getTierListByIdWithItems(firstId);
+            const second = await TierListDB.getTierListByIdWithItems(secondId);
+            expect(first!.unranked[0].tags.map(t => t.id)).toEqual([tag.id]);
+            expect(second!.unranked[0].tags).toEqual([]);
+        });
+
+        test('rejects assignment when the item or tag belongs to another tier list', async () => {
+            const firstId = await TierListDB.insertTierList(ownerId, null, ArtifactType.GAME, 'First');
+            const secondId = await TierListDB.insertTierList(ownerId, null, ArtifactType.GAME, 'Second');
+            await TierListDB.insertItem(firstId, ART[0], null, 0);
+            await TierListDB.insertItem(secondId, ART[1], null, 0);
+            const firstTag = await TierListDB.createTag(firstId, 'First tag', '#111111');
+
+            expect(await TierListDB.updateItemTag(secondId, ART[0], firstTag.id, true)).toBe(false);
+            expect(await TierListDB.updateItemTag(firstId, ART[1], firstTag.id, true)).toBe(false);
+            expect(await TierListDB.updateItemTag(firstId, ART[0], 999999, true)).toBe(false);
+        });
+
+        test('enforces case-insensitive duplicate tag names within a tier list', async () => {
+            const { tierListId } = await seedList();
+            await TierListDB.createTag(tierListId, 'Favorites', '#5b7cfa');
+
+            await expect(TierListDB.createTag(tierListId, 'favorites', '#ff0000')).rejects.toBeTruthy();
+        });
+
+        test('allows the same tag name in a different tier list', async () => {
+            const firstId = await TierListDB.insertTierList(ownerId, null, ArtifactType.GAME, 'First');
+            const secondId = await TierListDB.insertTierList(ownerId, null, ArtifactType.GAME, 'Second');
+
+            await expect(TierListDB.createTag(firstId, 'Favorites', '#111111')).resolves.toBeTruthy();
+            await expect(TierListDB.createTag(secondId, 'Favorites', '#222222')).resolves.toBeTruthy();
         });
     });
 

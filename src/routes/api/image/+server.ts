@@ -27,7 +27,22 @@ export async function GET({ url, fetch }: RequestEvent) {
         return error(400, 'Host not allowed');
     }
 
-    const response = await fetch(parsed.toString());
+    let response: Response;
+    for (let attempt = 0; ; attempt++) {
+        try {
+            response = await fetch(parsed.toString());
+        } catch (e) {
+            if (attempt === 1) {
+                throw e;
+            }
+            continue;
+        }
+
+        if (response.ok || (response.status !== 404 && response.status < 500) || attempt === 1) {
+            break;
+        }
+    }
+
     if (!response.ok) {
         return error(response.status, 'Failed to fetch image');
     }
