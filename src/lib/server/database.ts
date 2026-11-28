@@ -121,3 +121,43 @@ export const getDbRows = async <T>(query: string, params?: (queryParam)[]): Prom
         });
     });
 };
+
+export interface IDatabaseTransaction {
+    run(query: string, params?: queryParam[]): Promise<void>;
+    get<T>(query: string, params?: queryParam[]): Promise<T | null>;
+}
+
+export const runDbTransaction = async <T>(
+    operation: (transaction: IDatabaseTransaction) => Promise<T>
+): Promise<T> => {
+    const db = await connectDatabase();
+    const transaction: IDatabaseTransaction = {
+        run: (query, params) => new Promise<void>((resolve, reject) => {
+            db.run(query, params || [], err => err ? reject(err) : resolve());
+        }),
+        get: <Row>(query: string, params?: queryParam[]) => new Promise<Row | null>((resolve, reject) => {
+            db.get(query, params || [], (err, row) => {
+                if (err) reject(err);
+                else resolve((row as Row) || null);
+            });
+        })
+    };
+
+    try {
+        await transaction.run('BEGIN IMMEDIATE');
+        const result = await operation(transaction);
+        await transaction.run('COMMIT');
+        return result;
+    } catch (error) {
+        try {
+            await transaction.run('ROLLBACK');
+        } catch {
+            // The transaction may already have been rolled back by SQLite.
+        }
+        throw error;
+    } finally {
+        await new Promise<void>((resolve, reject) => {
+            db.close(err => err ? reject(err) : resolve());
+        });
+    }
+};

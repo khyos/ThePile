@@ -3,8 +3,11 @@ import type { PageServerLoad } from './$types';
 import { TierListUtil } from '#lib/server/model/TierListUtil';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	const tierListId = parseInt(params.slug);
-	if (isNaN(tierListId)) {
+	if (!/^\d+$/.test(params.slug)) {
+		error(400, 'Invalid tier list ID');
+	}
+	const tierListId = Number(params.slug);
+	if (!Number.isSafeInteger(tierListId) || tierListId <= 0) {
 		error(400, 'Invalid tier list ID');
 	}
 

@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { computeTargetPosition } from './dnd';
+import { describe, it, expect, vi } from 'vitest';
+import { computeTargetPosition, draggable, dropzone } from './dnd';
 
 /**
  * Standards tests for the drop-position computation in dnd.ts.
@@ -134,5 +134,61 @@ describe('computeTargetPosition - combined horizontal + decrement', () => {
             horizontal: true, basePosition: 2, offsetX: 10, targetWidth: 80,
             sourceTierId: 7, targetTierId: 7, sourceIndex: 2
         })).toBe(2);
+    });
+});
+
+function makeActionNode() {
+    const listeners = new Map<string, EventListenerOrEventListenerObject[]>();
+    const node = {
+        draggable: false,
+        style: { touchAction: 'auto', cursor: 'pointer' },
+        classList: { remove: vi.fn() },
+        addEventListener: vi.fn((type: string, listener: EventListenerOrEventListenerObject) => {
+            listeners.set(type, [...(listeners.get(type) ?? []), listener]);
+        }),
+        removeEventListener: vi.fn((type: string, listener: EventListenerOrEventListenerObject) => {
+            listeners.set(type, (listeners.get(type) ?? []).filter(existing => existing !== listener));
+        })
+    } as unknown as HTMLElement;
+    return { node, listeners };
+}
+
+describe('drag actions when editing is disabled', () => {
+    it('removes draggable listeners and resets draggable when canEdit changes to false', () => {
+        const { node, listeners } = makeActionNode();
+        const action = draggable(node, {
+            canEdit: true,
+            artifactId: 1,
+            sourceTierId: 2,
+            sourceIndex: 0
+        });
+
+        expect(node.draggable).toBe(true);
+        expect(listeners.get('dragstart')).toHaveLength(1);
+        action?.update({ canEdit: false, artifactId: 1, sourceTierId: 2, sourceIndex: 0 });
+
+        expect(node.draggable).toBe(false);
+        expect(node.style.touchAction).toBe('auto');
+        expect(node.style.cursor).toBe('pointer');
+        expect(listeners.get('dragstart')).toHaveLength(0);
+        expect(listeners.get('dragend')).toHaveLength(0);
+    });
+
+    it('removes dropzone listeners when canEdit changes to false', () => {
+        const { node, listeners } = makeActionNode();
+        const action = dropzone(node, {
+            canEdit: true,
+            tierId: 2,
+            position: 0,
+            onDrop: vi.fn()
+        });
+
+        expect(listeners.get('drop')).toHaveLength(1);
+        action?.update({ canEdit: false, tierId: 2, position: 0, onDrop: vi.fn() });
+
+        expect(listeners.get('dragenter')).toHaveLength(0);
+        expect(listeners.get('dragleave')).toHaveLength(0);
+        expect(listeners.get('dragover')).toHaveLength(0);
+        expect(listeners.get('drop')).toHaveLength(0);
     });
 });

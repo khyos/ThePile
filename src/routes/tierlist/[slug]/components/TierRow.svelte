@@ -1,15 +1,21 @@
 <script lang="ts">
     import type { ArtifactType } from "#lib/model/Artifact";
     import type { Tier } from "#lib/model/Tier";
+    import type { TierListItem } from "#lib/model/TierListItem";
+    import type { TierListTag } from "#lib/model/TierListTag";
     import TierListItemComp from "./TierListItemComp.svelte";
     import { dropzone, type TierId } from "./dnd";
 
     export let tier: Tier;
+    export let items: TierListItem[] = tier.items;
     export let artifactType: ArtifactType;
     export let canEdit: boolean = false;
+    export let canReorder: boolean = false;
     export let onDrop: (artifactId: number, sourceTierId: TierId, targetTierId: TierId, targetPosition: number) => void | Promise<void>;
     export let onUpdateTier: (tierId: number, label: string, color: string) => void | Promise<void>;
     export let onRemove: ((artifactId: number) => void | Promise<void>) | undefined = undefined;
+    export let tagDefinitions: TierListTag[] = [];
+    export let onTagChange: ((artifactId: number, tagId: number, assigned: boolean) => void | boolean | Promise<void | boolean>) | undefined = undefined;
 
     // Grow the label textarea to fit its content so multi-line labels are
     // fully visible while editing.
@@ -44,10 +50,10 @@
     </div>
     <div
         class="tier-items"
-        use:dropzone={{ canEdit, tierId: tier.id, position: tier.items.length, onDrop }}
+        use:dropzone={{ canEdit: canReorder, tierId: tier.id, position: items.length, onDrop }}
     >
-        {#each tier.items as item (item.artifact.id)}
-            <TierListItemComp {item} {artifactType} {canEdit} tierId={tier.id} {onDrop} {onRemove} />
+        {#each items as item (item.artifact.id)}
+            <TierListItemComp {item} {artifactType} {canEdit} {canReorder} tierId={tier.id} {onDrop} {onRemove} {tagDefinitions} {onTagChange} />
         {/each}
     </div>
 </div>

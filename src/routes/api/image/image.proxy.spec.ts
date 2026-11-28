@@ -96,4 +96,37 @@ describe('image proxy GET - validation', () => {
         const upstream = { ok: false, status: 404, headers: { get: () => null }, arrayBuffer: async () => new ArrayBuffer(0) };
         expect(await statusOf(GET(makeEvent('https://images.igdb.com/missing.jpg', vi.fn().mockResolvedValue(upstream) as never)))).toBe(404);
     });
+
+    it('retries once when the upstream temporarily returns 404', async () => {
+        const missing = { ok: false, status: 404, headers: { get: () => null }, arrayBuffer: async () => new ArrayBuffer(0) };
+        const image = {
+            ok: true,
+            status: 200,
+            headers: { get: (h: string) => (h === 'content-type' ? 'image/jpeg' : null) },
+            arrayBuffer: async () => new TextEncoder().encode('bytes').buffer
+        };
+        const fetchSpy = vi.fn().mockResolvedValueOnce(missing).mockResolvedValueOnce(image);
+
+        const response = (await GET(makeEvent('https://images.igdb.com/recovered.jpg', fetchSpy as never))) as Response;
+
+        expect(fetchSpy).toHaveBeenCalledTimes(2);
+        expect(response.status).toBe(200);
+        expect(response.headers.get('content-type')).toBe('image/jpeg');
+    });
+
+    it('retries once after a transient server error', async () => {
+        const unavailable = { ok: false, status: 503, headers: { get: () => null }, arrayBuffer: async () => new ArrayBuffer(0) };
+        const image = {
+            ok: true,
+            status: 200,
+            headers: { get: (h: string) => (h === 'content-type' ? 'image/jpeg' : null) },
+            arrayBuffer: async () => new TextEncoder().encode('bytes').buffer
+        };
+        const fetchSpy = vi.fn().mockResolvedValueOnce(unavailable).mockResolvedValueOnce(image);
+
+        const response = (await GET(makeEvent('https://image.tmdb.org/recovered.jpg', fetchSpy as never))) as Response;
+
+        expect(fetchSpy).toHaveBeenCalledTimes(2);
+        expect(response.status).toBe(200);
+    });
 });

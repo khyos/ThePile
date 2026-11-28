@@ -1,24 +1,28 @@
 <script lang="ts">
     import type { ArtifactType } from "#lib/model/Artifact";
     import type { TierListItem } from "#lib/model/TierListItem";
+    import type { TierListTag } from "#lib/model/TierListTag";
     import TierListItemComp from "./TierListItemComp.svelte";
     import { dropzone, type TierId } from "./dnd";
 
     export let items: TierListItem[];
     export let artifactType: ArtifactType;
     export let canEdit: boolean = false;
+    export let canReorder: boolean = false;
     export let onDrop: (artifactId: number, sourceTierId: TierId, targetTierId: TierId, targetPosition: number) => void | Promise<void>;
     export let onRemove: ((artifactId: number) => void | Promise<void>) | undefined = undefined;
+    export let tagDefinitions: TierListTag[] = [];
+    export let onTagChange: ((artifactId: number, tagId: number, assigned: boolean) => void | boolean | Promise<void | boolean>) | undefined = undefined;
 </script>
 
 <div class="unranked-pool">
     <div class="unranked-label">Unranked</div>
     <div
         class="unranked-items"
-        use:dropzone={{ canEdit, tierId: null, position: items.length, onDrop }}
+        use:dropzone={{ canEdit: canReorder, tierId: null, position: items.length, onDrop }}
     >
         {#each items as item (item.artifact.id)}
-            <TierListItemComp {item} {artifactType} {canEdit} tierId={null} {onDrop} {onRemove} />
+            <TierListItemComp {item} {artifactType} {canEdit} {canReorder} tierId={null} {onDrop} {onRemove} {tagDefinitions} {onTagChange} />
         {/each}
     </div>
 </div>

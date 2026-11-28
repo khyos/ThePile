@@ -245,6 +245,12 @@ Relationships:
 
 ---
 
+### 3.3 Tier Lists
+
+Tier lists contain ordered tiers and ranked or unranked artifacts. Each tier list may define reusable tags, each with a name and display color. A tier-list item can have multiple tags; definitions and assignments are scoped to that tier list and do not modify artifact records. Users can filter displayed items by tag. Reordering is disabled while a tag filter is active so hidden items cannot cause misleading order changes.
+
+---
+
 ## 4. User System
 
 ### 4.1 User
@@ -321,6 +327,8 @@ Where `{type}` ∈ `game`, `movie`, `tvshow`, `anime`.
 | POST | `/api/backlog/move` | Move item to another backlog |
 | POST | `/api/backlog/[slug]/elo` | ELO fight: `{winnerArtifactId, loserArtifactId}` |
 | POST | `/api/backlog/[slug]/tag` | Add/remove tag on item |
+| POST | `/api/tierlist/[slug]/tag` | Create a tag scoped to the tier list |
+| PATCH | `/api/tierlist/[slug]/tag` | Assign or remove a tag on a tier-list item |
 
 ### 5.4 Other
 
